@@ -1,0 +1,28 @@
+# --- Android / Gradle
+*.iml
+.gradle/
+local.properties
+.idea/
+build/
+captures/
+.externalNativeBuild
+.cxx
+*.keystore
+*.jks
+
+# --- server: i percorsi registrati sono dati personali, non codice
+server/dati/*.json
+server/dati/*/*/*.json
+server/dati/.tentativi.json
+server/dati/.ultima-pulizia
+
+# --- server: le impostazioni con le chiavi vere restano fuori
+server/settings.php
+
+# --- sistema
+.DS_Store
+Thumbs.db
+
+# --- firma: le chiavi non entrano mai nel repository
+keystore.properties
+android/keystore.properties

@@ -1,0 +1,2 @@
+-keep class net.fribbynetwork.iamhere.data.** { *; }
+-dontwarn org.maplibre.**

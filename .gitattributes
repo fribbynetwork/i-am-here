@@ -1,0 +1,17 @@
+# Gli script di shell devono restare con terminatori LF: con CRLF su Linux
+# e macOS falliscono con "bad interpreter".
+# Shell scripts must keep LF endings: with CRLF they fail on Linux and
+# macOS with "bad interpreter".
+gradlew     text eol=lf
+*.sh        text eol=lf
+
+# Gli script di Windows vogliono invece CRLF.
+gradlew.bat text eol=crlf
+*.bat       text eol=crlf
+
+# Binari: Git non deve toccarli.
+*.jar       binary
+*.png       binary
+*.ico       binary
+*.jks       binary
+*.keystore  binary

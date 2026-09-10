@@ -1,0 +1,743 @@
+/* IAH-VERSION 1.0.6.2 */
+/*
+ * I am here, stylesheet / foglio di stile.
+ *
+ * Copyright (C) 2026  I am here contributors
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. See the LICENSE file at the root of this repository.
+ */
+
+/*
+ * I am here, foglio di stile della pagina di visualizzazione.
+ *
+ * Impianto: la mappa occupa tutto, ogni altro elemento le sta sopra come
+ * pannello traslucido. Nessuno scorrimento di pagina.
+ *
+ * Regola cromatica: il colore forte lo porta il tracciato, che è il dato.
+ * L'interfaccia attorno resta in scala di teal, così i pulsanti non
+ * competono con la rampa delle velocità. L'arancione del marchio vive
+ * solo nel logo e sul punto di arrivo.
+ *
+ * Temi: data-tema è la scelta dell'utente (auto | chiaro | scuro),
+ * data-attivo è il tema risolto. Le regole guardano solo data-attivo,
+ * così le due palette stanno scritte una volta sola.
+ */
+
+/* ---------------------------------------------------------- palette chiara */
+:root, :root[data-attivo="chiaro"] {
+  --ink:        #F2F5F4;
+  --panel:      rgba(255, 255, 255, .93);
+  --panel-solid:#FFFFFF;
+  --line:       rgba(14, 59, 67, .18);
+  --line-soft:  rgba(14, 59, 67, .10);
+  --text:       #0B1416;
+  --muted:      #5C6F71;
+  --chip:       #0E3B43;
+  --chip-edge:  #1C6E7E;
+  --hi:         #0E3B43;
+  --grafico:    #1C6E7E;
+  --grafico-a:  rgba(28, 110, 126, .16);
+  --griglia:    #C9D6D6;
+  --veil:       rgba(242, 245, 244, .62);
+  --shadow:     0 6px 22px rgba(14, 59, 67, .20);
+  --tile-filter: none;
+  /* Contorno dei punti di transito: scuro in entrambi i temi, perché è
+     quello che li stacca sia dal verde chiaro sia dal grigio scuro della
+     mappa. Da qui si regola senza toccare il JavaScript. */
+  --punto-bordo: #0B1416;
+}
+
+/* ----------------------------------------------------------- palette scura */
+:root[data-attivo="scuro"] {
+  --ink:        #0B1416;
+  --panel:      rgba(13, 24, 26, .90);
+  --panel-solid:#121F22;
+  --line:       rgba(255, 255, 255, .13);
+  --line-soft:  rgba(255, 255, 255, .07);
+  --text:       #E7EEEE;
+  --muted:      #93A7A9;
+  --chip:       #1C6E7E;
+  --chip-edge:  #7CC5D2;
+  --hi:         #7CC5D2;
+  --grafico:    #7CC5D2;
+  --grafico-a:  rgba(124, 197, 210, .16);
+  --griglia:    #2A3A3C;
+  --veil:       rgba(11, 20, 22, .58);
+  --shadow:     0 6px 24px rgba(0, 0, 0, .38);
+  /* Le tile di OpenStreetMap esistono solo in versione chiara: questa è
+     un'inversione tarata per non virare al blu. Solo due funzioni, non
+     cinque: invertire e ruotare la tinta agiscono pixel per pixel e il
+     risultato è quasi identico, ma ogni funzione in più è un passaggio
+     in più da rifare a ogni fotogramma quando si trascina la mappa.
+     Se il tuo telefono arranca lo stesso, metti "none" e resta scura
+     solo l'interfaccia. */
+  --tile-filter: invert(.92) hue-rotate(180deg);
+  --punto-bordo: #0B1416;
+}
+
+:root {
+  --orange: #E4572E;
+  --r: 14px;
+  --r-lg: 20px;
+  --blur: blur(10px) saturate(120%);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+}
+
+#map { position: absolute; inset: 0; background: var(--ink); }
+
+/* Solo le mattonelle vengono filtrate, non il contenitore: il tracciato
+   conserva i suoi colori e il filtro non si rifà a ogni fotogramma. */
+.leaflet-tile { filter: var(--tile-filter); }
+
+/* Sfondo statico: l'immagine sostituisce le mattonelle quando non c'e
+   niente da mostrare, cosi nessuna richiesta esce verso l'esterno.
+   La versione scura non e un negativo ma la stessa mappa spenta e virata
+   sul teal: invertire un raster darebbe un risultato slavato. */
+#map.sfondo-statico {
+  background: url(mappa-chiara.webp) center / cover no-repeat;
+}
+html[data-attivo="scuro"] #map.sfondo-statico {
+  background-image: url(mappa-scura.webp);
+}
+#map.sfondo-statico .leaflet-tile-pane { display: none; }
+
+/* L'attribuzione quando la mappa e solo un'immagine e non c'e il riquadro
+   di Leaflet a portarla. */
+.credito-mappa {
+  position: absolute; right: 6px; bottom: 4px; z-index: 620;
+  margin: 0; padding: 3px 7px; border-radius: 6px;
+  font-size: 10.5px; line-height: 1.4;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel-solid) 82%, transparent);
+}
+.credito-mappa a { color: inherit; }
+@media (max-width: 720px) {
+  .credito-mappa { left: 6px; right: 6px; text-align: center; }
+}
+
+/* I comandi di Leaflet nascono con z-index 1000 e finirebbero sopra i
+   nostri riquadri, compreso il velo della scheda iniziale: li restavano
+   nitidi mentre tutto il resto e sfocato. Sopra la mappa, sotto di noi. */
+.leaflet-top, .leaflet-bottom { z-index: 500; }
+
+/* Le letture numeriche cambiano di continuo: cifre a larghezza fissa
+   evitano che i valori ballino a ogni aggiornamento. */
+.num { font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------- superfici */
+.surface {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+}
+
+/* --------------------------------------------------------------- marchio */
+/* Centrato in alto: a sinistra finiva sotto i comandi di zoom di Leaflet. */
+#brand {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  z-index: 600;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px 8px 8px;
+  max-width: calc(100% - 132px);
+}
+#brand .mark { width: 36px; height: 36px; display: block; flex: none; border-radius: 9px; }
+#brand .name { font-size: 16px; font-weight: 650; letter-spacing: .1px; white-space: nowrap; }
+#brand .state {
+  font-size: 11.5px; color: var(--muted); margin-top: 1px;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+#brand .state .live { color: var(--hi); font-weight: 600; }
+
+/* -------------------------------------------------------------- pulsanti */
+#tools {
+  position: absolute; top: 12px; right: 12px; z-index: 600;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.tool {
+  width: 44px; height: 44px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); cursor: pointer;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.tool svg { width: 21px; height: 21px; display: block; }
+/* Il pulsante della lingua porta due lettere invece di un'icona. */
+.tool.lang { font-size: 14px; font-weight: 700; letter-spacing: .5px; }
+.tool:hover { border-color: var(--chip-edge); }
+.tool:focus-visible { outline: 2px solid var(--chip-edge); outline-offset: 2px; }
+.tool[aria-pressed="true"] {
+  background: var(--chip);
+  border-color: var(--chip-edge);
+  color: #fff;
+}
+
+/* -------------------------------------------------------------- pannello */
+#sheet {
+  position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 610;
+  padding: 16px 18px 18px;
+  border-radius: var(--r-lg);
+  max-height: 46vh; overflow-y: auto;
+  display: none;
+}
+#sheet.open { display: block; }
+#sheet h2 {
+  margin: 0 0 12px;
+  font-size: 12.5px; font-weight: 600; color: var(--muted);
+  letter-spacing: .2px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+  gap: 14px 16px;
+}
+.cell .v { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.cell .k { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+
+#chart { width: 100%; height: 152px; display: block; margin-bottom: 8px; }
+.note { color: var(--muted); font-size: 12.5px; margin: 0; }
+
+/* --------------------------------------------------------------- legenda */
+#legend {
+  position: absolute; left: 12px; bottom: 12px; z-index: 590;
+  padding: 10px 14px 11px;
+  display: none;
+  font-size: 11.5px; color: var(--muted);
+}
+#legend.show { display: block; }
+#legend .title { color: var(--text); font-size: 12.5px; font-weight: 600; }
+#legend .sub { margin-top: 1px; }
+#legend .bar {
+  height: 9px; border-radius: 5px; width: 190px;
+  margin: 8px 0 4px;
+  border: 1px solid var(--line-soft);
+}
+#legend .ends {
+  display: flex; justify-content: space-between;
+  font-variant-numeric: tabular-nums; color: var(--text);
+}
+#legend .ends span:nth-child(2) { color: var(--muted); }
+
+/* Il pulsante della legenda esiste solo su schermo stretto: la regola
+   che lo mostra sta nella media query in fondo al foglio. */
+#legToggle { display: none; position: absolute; z-index: 615; }
+#legToggle svg { width: 22px; height: 22px; }
+
+/* -------------------------------------------------------- invito all'app */
+#invite {
+  position: absolute; inset: 0; z-index: 700;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background: var(--veil);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+#invite .card {
+  max-width: 360px; text-align: center;
+  padding: 28px 26px 26px;
+  border-radius: var(--r-lg);
+  /* Lo sfondo arriva da .surface: senza, il testo galleggiava
+     direttamente sulla mappa sfocata. */
+}
+/* Logo e nome affiancati: chi arriva deve capire subito dov'è. */
+#invite .intestazione {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin-bottom: 18px;
+}
+#invite .mark { width: 52px; height: 52px; display: block; border-radius: 13px; flex: none; }
+#invite .intestazione span { font-size: 21px; font-weight: 650; letter-spacing: .1px; }
+#invite h1 { margin: 0 0 8px; font-size: 19px; font-weight: 650; }
+#invite p { margin: 0 0 22px; font-size: 14px; color: var(--muted); }
+#invite a {
+  display: block; text-decoration: none; text-align: center;
+  padding: 13px 24px; border-radius: 12px;
+  font-weight: 600; font-size: 15px;
+}
+#invite a.principale { background: var(--orange); color: #fff; }
+#invite a.secondario {
+  margin-top: 10px; color: var(--text);
+  border: 1px solid var(--line); background: transparent;
+}
+#invite a.secondario:hover { border-color: var(--chip-edge); }
+#invite a:focus-visible { outline: 2px solid var(--chip-edge); outline-offset: 3px; }
+
+/* ----------------------------------------------------------------- popup */
+.leaflet-popup-content-wrapper {
+  background: var(--panel-solid);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+}
+.leaflet-popup-tip { background: var(--panel-solid); }
+.leaflet-popup-content { margin: 13px 15px; font-size: 13px; min-width: 190px; }
+.leaflet-popup-content .head {
+  font-weight: 650; font-size: 14px;
+  padding-bottom: 8px; margin-bottom: 8px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.leaflet-popup-content .head .dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  margin-right: 7px; vertical-align: 1px;
+}
+.leaflet-popup-content dl {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 3px 14px; margin: 0;
+}
+.leaflet-popup-content dt { color: var(--muted); white-space: nowrap; }
+.leaflet-popup-content dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
+.leaflet-container a.leaflet-popup-close-button:hover { color: var(--text); }
+
+/* Controlli di Leaflet allineati al resto */
+.leaflet-bar a, .leaflet-bar a:hover {
+  background: var(--panel-solid); color: var(--text);
+  border-bottom-color: var(--line);
+}
+.leaflet-bar a:hover { color: var(--hi); }
+.leaflet-control-attribution {
+  background: var(--panel) !important;
+  color: var(--muted); font-size: 10.5px;
+}
+.leaflet-control-attribution a { color: var(--hi); }
+
+/* ------------------------------------------------------- schermi piccoli */
+@media (max-width: 480px) {
+  #brand { padding: 7px 13px 7px 7px; gap: 9px; max-width: calc(100% - 124px); }
+  #brand .mark { width: 32px; height: 32px; }
+  #brand .name { font-size: 15px; }
+  #legend .bar { width: 150px; }
+  #sheet { max-height: 52vh; padding: 14px 15px 16px; }
+  .grid { gap: 12px; }
+}
+
+/* Sotto una certa altezza la legenda darebbe fastidio al pannello */
+@media (max-height: 480px) {
+  #legend { display: none !important; }
+}
+
+/* La sfocatura dietro i pannelli obbliga il browser a rileggere i pixel
+   della mappa a ogni fotogramma. Sui dispositivi a tocco, dove la mappa
+   si sposta col dito, il conto si paga tutto insieme: meglio rinunciarci
+   e rendere i pannelli più coprenti. */
+@media (hover: none) {
+  .surface, .tool {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  :root[data-attivo="chiaro"] { --panel: rgba(255, 255, 255, .97); }
+  :root[data-attivo="scuro"]  { --panel: rgba(13, 24, 26, .96); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+
+/* =====================================================================
+   Elenco dei viaggi (viaggi.php)
+
+   La mappa fa da sfondo come in index.php: il pannello ci galleggia
+   sopra, a sinistra su schermo largo e a tutto schermo sul telefono.
+   Un livello alla volta e visibile, per non rubare spazio alla mappa.
+   ===================================================================== */
+
+.pannello {
+  position: absolute; z-index: 620;
+  top: 12px; bottom: 12px;
+  width: 340px;
+  display: flex; flex-direction: column;
+  border-radius: var(--r-lg);
+  overflow: hidden;                 /* gli angoli tagliano anche il contenuto */
+}
+
+/* Quali pannelli si vedono lo decide data-livello sul body. Tenerlo qui
+   invece che nel JavaScript significa che le due disposizioni, schermo
+   largo e telefono, restano vicine e leggibili. */
+#pp { left: 12px; }
+#pv { left: 364px; }
+
+/* display:none non si puo animare: si nasconde con opacita e
+   spostamento, che il browser muove sulla scheda grafica senza scatti.
+   visibility toglie il pannello dalla navigazione da tastiera a
+   transizione finita. */
+.pannello {
+  transition: opacity .2s ease, transform .2s ease, left .24s ease, visibility .2s;
+}
+body[data-livello="periodi"] #pv,
+body[data-livello="mappa"]   #pp,
+body[data-livello="chiuso"]  #pp,
+body[data-livello="chiuso"]  #pv {
+  opacity: 0;
+  transform: translateX(-14px);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Scelto un viaggio, l'elenco scivola al posto dei periodi: la mappa
+   guadagna spazio e si continua a passare da un percorso all'altro. */
+body[data-livello="mappa"] #pv { left: 12px; }
+
+#riapri {
+  position: absolute; z-index: 615; top: 12px; left: 12px;
+  opacity: 0; transform: scale(.85); visibility: hidden; pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease, visibility .18s;
+}
+body[data-livello="chiuso"] #riapri {
+  opacity: 1; transform: none; visibility: visible; pointer-events: auto;
+}
+
+/* --- intestazione e piede fermi, scorre solo la fascia centrale --- */
+.pannello .pt {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 18px 12px;
+  flex: none;
+}
+.pannello .pt h1 {
+  margin: 0; flex: 1; min-width: 0;
+  font-size: 16px; font-weight: 650;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* In fondo, staccata da tutto: chiude la sessione, non un pannello.
+   Accanto la versione del server, che dice a colpo d'occhio se i file
+   caricati sono quelli nuovi. */
+.pannello .fondo {
+  flex: none; display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; padding: 10px 14px 12px;
+  border-top: 1px solid var(--line-soft);
+}
+.pannello .esci { color: var(--muted); text-decoration: none; font-size: 13px; }
+.pannello .esci:hover { color: var(--hi); }
+.pannello .versione {
+  color: var(--muted); font-size: 12px; opacity: .75;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.pannello .strumenti { margin-right: -4px; }
+.pannello .back, .pannello .chiudi, .pannello .strumenti {
+  flex: none; width: 32px; height: 32px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid var(--line); border-radius: 9px;
+  color: var(--text); cursor: pointer;
+}
+.pannello .back svg, .pannello .chiudi svg, .pannello .strumenti svg { width: 18px; height: 18px; }
+.pannello .back:hover, .pannello .chiudi:hover, .pannello .strumenti:hover { border-color: var(--chip-edge); }
+/* Su schermo largo i periodi sono gia accanto: la freccia serve solo
+   quando l'elenco si e spostato al loro posto. */
+body[data-livello="viaggi"] .pannello .back,
+body[data-livello="strumenti"] .pannello .back { display: none; }
+
+.pannello .fissi { padding: 4px 12px 0; flex: none; }
+.pannello .nota { color: var(--muted); font-size: 13px; padding: 20px 18px; margin: 0; text-align: center; }
+
+/* --- voci dei periodi --- */
+.pannello .voce {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; margin-bottom: 6px; padding: 11px 14px;
+  background: transparent; border: 1px solid transparent; border-radius: 11px;
+  color: var(--text); font-size: 14.5px; font-family: inherit; text-align: left;
+  cursor: pointer;
+}
+.pannello .voce:hover { background: var(--line-soft); }
+.pannello .voce.attiva { background: var(--chip); border-color: var(--chip-edge); color: #fff; }
+.pannello .voce em {
+  position: relative;
+  font-style: normal; font-size: 12px; color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.pannello .voce.attiva em { color: rgba(255, 255, 255, .75); }
+
+/* A destra della voce: l'etichetta arancione quando in quel periodo c'e
+   una condivisione ancora aperta, e accanto il conteggio. Si vede che
+   qualcosa sta arrivando adesso senza aprire l'elenco. */
+.pannello .voce .coda {
+  display: flex; align-items: center; gap: 8px; flex: none;
+}
+.pannello .voce .coda .vivo { margin-left: 0; vertical-align: baseline; }
+
+/* --- fascia scorrevole --- */
+.pannello .scorre {
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 12px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.pannello .scorre::-webkit-scrollbar { width: 8px; }
+.pannello .scorre::-webkit-scrollbar-track { background: transparent; }
+.pannello .scorre::-webkit-scrollbar-thumb {
+  background: var(--line); border-radius: 99px;
+  border: 2px solid transparent; background-clip: content-box;
+}
+.pannello .scorre::-webkit-scrollbar-thumb:hover {
+  background-color: var(--chip-edge); background-clip: content-box;
+}
+
+/* Separatore fra i periodi rapidi e i mesi: corto e centrato, per
+   dividere senza tagliare il pannello in due. */
+#pp .scorre { position: relative; margin-top: 14px; padding-top: 14px; }
+#pp .scorre::before {
+  content: ''; position: absolute; top: 0; left: 22%; right: 22%;
+  height: 1px; background: var(--line);
+}
+
+/* --- cambio anno --- */
+.pannello .anni {
+  flex: none;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+  padding: 10px 14px 12px; border-top: 1px solid var(--line-soft);
+  font-variant-numeric: tabular-nums;
+}
+/* La griglia con le colonne laterali uguali tiene l'anno al centro anche
+   quando una delle due frecce non c'e. */
+.pannello .anni strong { font-size: 15px; text-align: center; }
+.pannello .anni > :first-child { justify-self: start; }
+.pannello .anni > :last-child  { justify-self: end; }
+.pannello .anno {
+  padding: 6px 11px; border-radius: 9px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent;
+  color: var(--text); font-size: 12.5px; font-family: inherit;
+}
+.pannello .anno:hover { border-color: var(--chip-edge); }
+
+/* --- importa ed esporta --- */
+
+.pannello .sez {
+  margin: 14px 2px 6px; font-size: 12px; font-weight: 600;
+  color: var(--muted); letter-spacing: .3px; text-transform: uppercase;
+}
+.pannello .scorre > .sez:first-child { margin-top: 2px; }
+.pannello .etichetta { margin: 0 2px 8px; font-size: 13px; color: var(--muted); }
+
+.formati { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+.formato {
+  display: block; padding: 9px 11px; border-radius: 10px;
+  border: 1px solid var(--line); color: var(--text); text-decoration: none;
+}
+.formato:hover { border-color: var(--chip-edge); background: var(--line-soft); }
+.formato strong { display: block; font-size: 14px; }
+.formato span { font-size: 11.5px; color: var(--muted); }
+
+/* Il campo per i file: quello di sistema e brutto e non si puo vestire,
+   quindi si nasconde e si usa l'etichetta come pulsante. */
+.scegli input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.scegli span {
+  display: block; text-align: center; cursor: pointer;
+  padding: 12px 14px; border-radius: 11px;
+  border: 1px dashed var(--line); color: var(--text); font-size: 14.5px;
+}
+.scegli:hover span { border-color: var(--chip-edge); background: var(--line-soft); }
+.scegli input:focus-visible + span { outline: 2px solid var(--chip-edge); outline-offset: 2px; }
+.pannello .esito { margin: 10px 2px 0; font-size: 13px; color: var(--hi); }
+
+/* La domanda sui conflitti: al centro, sopra tutto. */
+.domanda-modale {
+  position: fixed; inset: 0; z-index: 900;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; background: rgba(0, 0, 0, .45);
+}
+.domanda-modale .riquadro { max-width: 380px; padding: 22px; border-radius: var(--r-lg); }
+.domanda-modale h2 { margin: 0 0 8px; font-size: 17px; }
+.domanda-modale p { margin: 0 0 16px; font-size: 14px; color: var(--muted); }
+.domanda-modale .scelte { display: flex; flex-wrap: wrap; gap: 8px; }
+.domanda-modale button {
+  flex: 1 1 auto; padding: 10px 14px; border-radius: 10px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent;
+  color: var(--text); font-size: 14px; font-family: inherit;
+}
+.domanda-modale button:hover { border-color: var(--chip-edge); }
+.domanda-modale button[data-s="sostituisci"]:hover { border-color: #B3261E; color: #E06B62; }
+
+/* --- elenco dei viaggi --- */
+.pannello .giorno {
+  margin: 14px 2px 8px; font-size: 12px; font-weight: 600;
+  color: var(--muted); letter-spacing: .2px;
+}
+.pannello .lista .giorno:first-child { margin-top: 2px; }
+
+/* Un bordo attorno a ogni viaggio: con molte righe di orari simili,
+   senza una separazione visibile si perde il segno. */
+.pannello .viaggio {
+  display: flex; align-items: stretch; gap: 4px;
+  margin-bottom: 8px; border-radius: 11px;
+  border: 1px solid var(--line);
+}
+.pannello .viaggio:hover { background: var(--line-soft); border-color: var(--chip-edge); }
+.pannello .viaggio.scelto { background: var(--line-soft); border-color: var(--chip-edge); }
+.pannello .viaggio .apri {
+  flex: 1; min-width: 0; padding: 10px 12px;
+  background: transparent; border: 0; border-radius: 11px;
+  color: var(--text); font-family: inherit; text-align: left; cursor: pointer;
+}
+.pannello .quando { font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.pannello .quando .sep { color: var(--muted); margin: 0 4px; }
+.pannello .vivo {
+  margin-left: 8px; font-size: 11px; font-weight: 600; color: #fff;
+  background: var(--orange); padding: 2px 8px; border-radius: 999px; vertical-align: 1px;
+}
+.pannello .numeri {
+  margin-top: 3px; font-size: 12px; color: var(--muted);
+  display: flex; flex-wrap: wrap; gap: 2px 12px; font-variant-numeric: tabular-nums;
+}
+.pannello .numeri .dest { color: var(--hi); }
+
+.pannello .azioni {
+  flex: none; align-self: center; padding-right: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  gap: 4px;
+}
+/* Esporta e copia sulla prima riga, elimina sotto a copia: due righe
+   invece di tre, cosi la riga del viaggio resta bassa. */
+.pannello .azioni .elimina { grid-column: 2; }
+.pannello .ic {
+  width: 30px; height: 30px; padding: 0; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid transparent; border-radius: 8px;
+  color: var(--muted);
+}
+.pannello .ic svg { width: 16px; height: 16px; }
+.pannello .ic:hover { border-color: var(--line); color: var(--text); }
+.pannello .ic.elimina:hover { border-color: #B3261E; color: #E06B62; }
+.pannello .ic.fatto { color: var(--hi); border-color: var(--chip-edge); }
+
+/* --- telefono: un pannello alla volta, a tutto schermo --- */
+@media (max-width: 720px) {
+  .pannello {
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: auto; border-radius: 0; border-width: 0;
+  }
+  /* Servono i selettori per id: #pp e #pv hanno gia un "left" per id
+     nella disposizione a schermo largo, e una regola per classe non
+     basterebbe a scavalcarli. */
+  #pp { left: 0; }
+  #pv { left: 0; }
+  body[data-livello="mappa"] #pv { left: 0; }
+  /* A tutto schermo lo spostamento e completo: il pannello entra ed
+     esce dal bordo, come ci si aspetta da un cassetto. */
+  body[data-livello="periodi"]  #pv,
+  body[data-livello="viaggi"]    #pp,
+  body[data-livello="strumenti"] #pp,
+  body[data-livello="mappa"]     #pp,
+  body[data-livello="chiuso"]    #pp,
+  body[data-livello="chiuso"]    #pv {
+    opacity: 0; transform: translateX(-100%); visibility: hidden; pointer-events: none;
+  }
+  .pannello .pt { padding: 16px 16px 12px; }
+  /* Qui la freccia serve sempre: i periodi non sono accanto. */
+  body[data-livello="viaggi"] .pannello .back,
+  body[data-livello="strumenti"] .pannello .back { display: flex; }
+  #brand, #tools, #legend { z-index: 600; }
+
+  /* In basso una riga sola di comandi, senza sovrapposizioni:
+     legenda a sinistra, elenco al centro, zoom a destra. */
+  #riapri {
+    top: auto; bottom: 18px; left: 50%;
+    width: 52px; height: 52px;
+    transform: translateX(-50%) scale(.85);
+  }
+  body[data-livello="chiuso"] #riapri { transform: translateX(-50%); }
+
+  /* La legenda si apre col pulsante e si stende sopra la riga dei
+     comandi, quindi non copre nulla di cliccabile. */
+  #legend.show { display: none; }
+  #legend.show + #legToggle { display: flex; bottom: 18px; left: 12px; width: 52px; height: 52px; }
+
+  /* Larga quanto le serve e ancorata a sinistra: cosi resta allineata
+     al proprio pulsante e non arriva mai sopra i comandi di zoom, che
+     stanno nell'angolo opposto. */
+  body[data-legenda="aperta"] #legend.show {
+    display: block;
+    left: 12px; right: auto; bottom: 84px; width: auto;
+  }
+}
+
+@media (max-height: 560px) {
+  .pannello .anni { padding: 8px 14px; }
+}
+
+/* =====================================================================
+   Pagine normali (verifica.php)
+
+   Non sono a schermo pieno come la mappa: qui il contenuto scorre.
+   Serve annullare l'overflow nascosto che html,body ereditano.
+   ===================================================================== */
+
+/* L'overflow nascosto sta su html oltre che su body: annullarlo solo su
+   body non basta, la pagina resterebbe tagliata e senza scorrimento. */
+html.pagina, html.pagina body {
+  height: auto; min-height: 100%;
+  overflow: auto;
+}
+body.pagina { padding-bottom: 40px; }
+
+.contenuto { max-width: 720px; margin: 0 auto; padding: 26px 16px 0; }
+.contenuto h1 { margin: 0 0 6px; font-size: 20px; font-weight: 650; }
+.contenuto .intro { margin: 0 0 20px; }
+.contenuto a { color: var(--hi); }
+.azioni-testo { margin-top: 22px; color: var(--muted); font-size: 14px; }
+
+.riga {
+  display: flex; gap: 12px; align-items: baseline;
+  padding: 14px 16px; margin-bottom: 10px;
+  border-radius: var(--r);
+}
+.riga strong { font-size: 14.5px; }
+.riga .note { margin-top: 3px; }
+.riga .segno { font-size: 16px; line-height: 1; flex: none; }
+.riga.si    .segno { color: #4CAF50; }
+.riga.no    .segno { color: #E06B62; }
+.riga.forse .segno { color: var(--orange); }
+
+/* --- accesso: modulo dentro la scheda iniziale --- */
+#invite form { margin: 4px 0 10px; }
+#invite input[type="password"] {
+  width: 100%; padding: 13px 14px; margin-bottom: 10px;
+  border-radius: 12px; border: 1px solid var(--line);
+  background: var(--panel-solid); color: var(--text);
+  font-size: 15px; font-family: inherit;
+}
+#invite input[type="password"]:focus-visible {
+  outline: 2px solid var(--chip-edge); outline-offset: 1px; border-color: var(--chip-edge);
+}
+#invite button.principale {
+  width: 100%; padding: 13px 24px; border: 0; border-radius: 12px;
+  background: var(--orange); color: #fff;
+  font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer;
+}
+#invite code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .92em; padding: 1px 5px; border-radius: 5px;
+  background: var(--line-soft);
+}
+
+#invite .errore {
+  margin: 0 0 14px; font-size: 13.5px; color: #fff;
+  background: #B3261E; border-radius: 10px; padding: 10px 12px; text-align: left;
+}
+#invite .errore a { color: #fff; }

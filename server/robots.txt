@@ -1,0 +1,6 @@
+# I percorsi non devono finire nei motori di ricerca: un link condiviso
+# e poi indicizzato renderebbe pubblico dove sei stato.
+# Journeys must not end up in search engines: a shared link that gets
+# indexed would make your whereabouts public.
+User-agent: *
+Disallow: /

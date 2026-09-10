@@ -1,0 +1,1 @@
+Share your live location to your own endpoint and by SMS, without Google.

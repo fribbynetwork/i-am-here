@@ -1,0 +1,24 @@
+Share your live location to any HTTP endpoint and by text message, and stop
+automatically when you reach a destination you picked on a map.
+
+Works without Google Play Services: location comes from the AOSP location
+manager, maps from MapLibre, retries from WorkManager. It installs on any
+device, including ones with no Google apps at all.
+
+You decide where the data goes. Write the URL yourself, with the parameter
+names and order your server expects, choosing GET, POST form or POST JSON.
+Nothing is sent anywhere else: there is no account, no analytics and no
+tracking of any kind.
+
+Features:
+
+* Sharing to an HTTP endpoint, by SMS, or both, each on its own schedule
+* Destinations picked on a map, with an arrival radius; sharing stops on arrival
+* Offline queue: positions are kept and sent in order when the network returns
+* Adaptive cadence, tighter near the destination and looser when parked
+* Rich data: accuracy, altitude, speed, heading, satellites, battery, pressure
+* Persistent notification with elapsed time, distance left and last result
+* Quick Settings tile, diagnostics screen, light and dark themes
+* English and Italian
+
+An optional PHP endpoint and map viewer are included in the source repository.

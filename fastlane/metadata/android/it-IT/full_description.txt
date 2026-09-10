@@ -1,0 +1,25 @@
+Condivide la posizione in tempo reale verso un qualsiasi endpoint HTTP e via
+SMS, e si ferma da sola quando raggiungi una destinazione scelta sulla mappa.
+
+Funziona senza Google Play Services: la posizione arriva dal gestore di
+localizzazione di AOSP, le mappe da MapLibre, i reinvii da WorkManager. Si
+installa su qualsiasi dispositivo, anche senza nessuna app Google.
+
+Decidi tu dove finiscono i dati. L'URL lo scrivi tu, con i nomi e l'ordine dei
+parametri che il tuo server si aspetta, scegliendo fra GET, POST form e POST
+JSON. Non viene inviato niente altrove: nessun account, nessuna statistica,
+nessun tracciamento di alcun tipo.
+
+Cosa fa:
+
+* Invio a un endpoint HTTP, via SMS o entrambi, ognuno con la sua cadenza
+* Destinazioni scelte sulla mappa con un raggio di arrivo; all'arrivo si ferma
+* Coda offline: le posizioni restano salvate e partono in ordine al ritorno della rete
+* Cadenza adattiva, più fitta vicino alla meta e più larga da fermo
+* Dati completi: precisione, quota, velocità, direzione, satelliti, batteria, pressione
+* Notifica persistente con tempo trascorso, distanza residua ed esito dell'ultimo invio
+* Riquadro nelle Impostazioni Rapide, schermata di diagnostica, temi chiaro e scuro
+* Italiano e inglese
+
+Nel repository dei sorgenti sono inclusi anche un endpoint PHP e un
+visualizzatore del percorso su mappa, facoltativi.

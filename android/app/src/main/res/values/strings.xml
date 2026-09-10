@@ -1,0 +1,306 @@
+<resources>
+    <string name="app_name">I am here</string>
+    <string name="channel_tracking">Location sharing</string>
+
+    <!-- common -->
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="settings">Settings</string>
+    <string name="history">History</string>
+    <string name="diagnostics">Diagnostics</string>
+    <string name="dash">--</string>
+
+    <!-- home -->
+    <string name="sharing_active">Sharing</string>
+    <string name="tile_idle">Share location</string>
+    <string name="sharing_stopped">Stopped</string>
+    <string name="no_trip">No trip in progress</string>
+    <string name="heading_to_with_distance">To %1$s · %2$s left</string>
+    <string name="heading_to">To %1$s</string>
+    <string name="free_sharing">Open-ended sharing, stops when you say so</string>
+    <string name="trip_id">Trip %1$d</string>
+    <string name="start_sharing">Start sharing</string>
+    <string name="stop_sharing">Stop and send last point</string>
+    <string name="destination_named">Destination: %1$s</string>
+    <string name="choose_destination">Choose destination</string>
+    <string name="last_fix">Last fix</string>
+    <string name="waiting_for_gps">Waiting for the first GPS lock.</string>
+    <string name="accuracy">Accuracy</string>
+    <string name="speed">Speed</string>
+    <string name="altitude">Altitude</string>
+    <string name="satellites">Satellites</string>
+    <string name="transmissions">Transmissions</string>
+    <string name="sent">Sent</string>
+    <string name="queued">Queued</string>
+    <string name="retry_now">Retry now</string>
+    <string name="meters_short">%1$d m</string>
+
+    <!-- destination -->
+    <string name="destination">Destination</string>
+    <string name="new_point">New point</string>
+    <string name="selected_destination">Selected destination</string>
+    <string name="radius_meters">Radius %1$d m</string>
+    <string name="radius_meters_global">Radius %1$d m (global)</string>
+    <string name="switch_to_free">Switch to open-ended sharing</string>
+    <string name="no_destination_explainer">With no destination the app keeps sharing until you press Stop.</string>
+    <string name="no_points_saved">No saved points yet. Create one and it will appear here.</string>
+    <string name="selected">Selected</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+
+    <!-- point editor -->
+    <string name="edit_point">Edit point</string>
+    <string name="name">Name</string>
+    <string name="drag_map_hint">Drag the map: the point is the centre of the crosshair.</string>
+    <string name="arrival_radius">Arrival radius: %1$d m</string>
+    <string name="radius_floor_hint">Below 50 metres GPS is not reliable enough to call an arrival.</string>
+    <string name="type_coordinates">Type coordinates by hand</string>
+    <string name="back_to_map">Back to the map</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="use_current_position">Use current position</string>
+    <string name="save_point">Save point</string>
+    <string name="save_changes">Save changes</string>
+    <string name="use_without_saving">Use as destination without saving</string>
+    <string name="unnamed_point">Unnamed point</string>
+    <string name="map_point">Map point</string>
+
+    <!-- settings: channels -->
+    <string name="how_to_transmit">How to transmit</string>
+    <string name="how_to_transmit_help">Use the endpoint, SMS or both. Each has its own schedule.</string>
+    <string name="send_to_endpoint">Send to endpoint</string>
+    <string name="send_by_sms">Send by SMS</string>
+    <string name="when_label">When</string>
+    <string name="mode_start_end">Start and arrival</string>
+    <string name="mode_always">Along the way too</string>
+
+    <!-- settings: endpoint -->
+    <string name="endpoint">Endpoint</string>
+    <string name="endpoint_help">Write the full URL with its parameters: names and order are yours to choose. With POST the query parameters move into the body.</string>
+    <string name="method">Method</string>
+    <string name="url_start">URL at departure</string>
+    <string name="url_track">URL along the way</string>
+    <string name="url_end">URL on arrival</string>
+    <string name="inherits_from_start">Empty = same as departure</string>
+    <string name="http_headers">HTTP headers</string>
+    <string name="http_headers_help">One per line, format Name: value. Useful for moving the key out of the URL.</string>
+    <string name="test_send">Test send</string>
+    <string name="test_result">Test result</string>
+
+    <!-- settings: sms -->
+    <string name="sms">SMS</string>
+    <string name="sms_help">Android throttles automatic sending: below a few minutes between messages the system may block them.</string>
+    <string name="recipients">Recipients</string>
+    <string name="recipients_help">Several numbers separated by commas</string>
+    <string name="sim">SIM</string>
+    <string name="sim_default">Default</string>
+    <string name="sms_start">Message at departure</string>
+    <string name="sms_track">Message along the way</string>
+    <string name="sms_end">Message on arrival</string>
+    <string name="sms_min_interval">Minimum gap between texts</string>
+    <string name="minutes_short"> min</string>
+    <string name="sms_min_interval_help">Applies to messages along the way only. Departure and arrival always go through.</string>
+    <string name="test_sms">Test SMS</string>
+
+    <!-- settings: cadence -->
+    <string name="cadence">Cadence</string>
+    <string name="cadence_help">A point goes out once the interval has passed and you have moved at least the minimum distance. Standing still, one goes out every four intervals anyway.</string>
+    <string name="interval">Interval</string>
+    <string name="seconds_short"> s</string>
+    <string name="min_distance">Minimum distance</string>
+    <string name="meters_suffix"> m</string>
+    <string name="adaptive_cadence">Adaptive cadence</string>
+    <string name="adaptive_cadence_help">Tighter near the destination, looser when parked</string>
+
+    <!-- settings: trip -->
+    <string name="trip">Trip</string>
+    <string name="default_radius">Default arrival radius</string>
+    <string name="default_radius_help">Each saved point can override this.</string>
+    <string name="max_duration">Maximum duration</string>
+    <string name="max_duration_off">No limit: stops only by hand or on arrival.</string>
+    <string name="max_duration_on">Past this the trip closes itself.</string>
+    <string name="battery_stop">Stop below battery</string>
+    <string name="battery_stop_off">Zero: keep transmitting until the phone dies, using every send available.</string>
+    <string name="battery_stop_on">Below this level one last point goes out and sharing closes.</string>
+    <string name="percent_suffix">%</string>
+    <string name="coord_decimals">Coordinate decimals</string>
+    <string name="coord_decimals_help">Six decimals is about 11 cm; beyond that is noise.</string>
+
+    <!-- settings: map -->
+    <string name="map">Map</string>
+    <string name="map_help">The map appearance can be changed by pointing at a MapLibre style, a JSON file describing colours and layers. Leave it empty to use the default one.</string>
+    <string name="custom_style_url">Custom style URL</string>
+    <string name="custom_style_help">Takes priority over everything else. Useful for a self-hosted style.</string>
+
+    <!-- settings: appearance -->
+    <string name="appearance">Appearance</string>
+    <string name="theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="language">Language</string>
+    <string name="language_system">System</string>
+    <string name="language_en">English</string>
+    <string name="language_it">Italiano</string>
+
+    <!-- settings: placeholders -->
+    <string name="placeholders">Available placeholders</string>
+    <string name="placeholders_help">Use them in any URL or message. Misspelled ones stay visible exactly as you typed them.</string>
+    <string name="ph_lat">Latitude</string>
+    <string name="ph_lon">Longitude</string>
+    <string name="ph_timestamp">Trip id: unix time when sharing started</string>
+    <string name="ph_tempo">Time of the fix (unix)</string>
+    <string name="ph_tempoiso">Time of the fix (ISO 8601)</string>
+    <string name="ph_evento">start / track / end</string>
+    <string name="ph_alt">Altitude in metres</string>
+    <string name="ph_acc">Horizontal accuracy in metres</string>
+    <string name="ph_vacc">Vertical accuracy in metres</string>
+    <string name="ph_vel">Speed in m/s</string>
+    <string name="ph_velkmh">Speed in km/h</string>
+    <string name="ph_dir">Direction of travel in degrees</string>
+    <string name="ph_prov">Fix provider (gps / network)</string>
+    <string name="ph_sat">Satellites in view</string>
+    <string name="ph_satuso">Satellites used in the fix</string>
+    <string name="ph_bat">Battery percentage</string>
+    <string name="ph_carica">Charging (1 / 0)</string>
+    <string name="ph_rete">Connection (wifi / mobile / none)</string>
+    <string name="ph_press">Barometric pressure in hPa</string>
+    <string name="ph_dist">Metres left to the destination</string>
+    <string name="ph_dest">Destination name</string>
+    <string name="ph_ritardo">Seconds between fix and send</string>
+
+    <!-- history -->
+    <string name="last_trip">Last trip</string>
+    <string name="trip_free">open-ended</string>
+    <string name="trip_closed">closed: %1$s</string>
+    <string name="trip_running">running</string>
+    <string name="clear_history">Clear history</string>
+    <string name="no_sends_yet">No transmissions recorded yet.</string>
+    <string name="sent_at">Sent at %1$s</string>
+    <string name="queued_attempts">Queued · %1$d attempts · %2$s</string>
+
+    <!-- diagnostics -->
+    <string name="diagnostics_intro">Red rows stop sharing from working. Amber ones only make it sturdier. This page rechecks itself while anything is missing.</string>
+    <string name="diagnostics_all_ok">Everything is in place. Sharing can run undisturbed.</string>
+    <string name="diagnostics_only_optional">The essentials are in place. What is left in amber is an improvement, not a requirement.</string>
+    <string name="check_fine_location">Precise location</string>
+    <string name="check_fine_location_help">Without this permission no coordinate is available at all.</string>
+    <string name="check_background_location">Location all the time</string>
+    <string name="check_background_location_help">Since Android 11 this is granted by hand in the system settings, choosing \"Allow all the time\".</string>
+    <string name="check_gps_on">GPS switched on</string>
+    <string name="check_gps_on_help">The system location service must be active.</string>
+    <string name="check_notifications">Notifications</string>
+    <string name="check_notifications_help">The foreground service needs its persistent notification.</string>
+    <string name="check_sms">SMS sending</string>
+    <string name="check_sms_help">Only needed if you use the SMS channel.</string>
+    <string name="restricted_settings">SMS permission greyed out?</string>
+    <string name="restricted_settings_help">Android blocks the SMS permission for apps installed straight from an APK file, and shows a shield saying access was denied. To unblock it: Settings, Apps, this app, then the three-dot menu at the top right and the entry about restricted settings. Confirm with your PIN or fingerprint, and the permission can then be granted normally. Apps installed from a store, F-Droid included, never hit this.</string>
+    <string name="check_battery">Battery not optimised</string>
+    <string name="check_battery_help">Not required: a foreground service keeps working anyway. The exemption helps on long stops with the screen off and after a reboot.</string>
+    <string name="open_settings">Open</string>
+    <string name="autostart">Autostart</string>
+    <string name="autostart_help">On Xiaomi, Huawei, Oppo, Vivo and Samsung the system kills background services even with every permission granted. Look for \"Autostart\" in the phone settings and enable it for this app.</string>
+
+    <!-- notification -->
+    <string name="notif_starting">Starting</string>
+    <string name="notif_heading_to">Heading to %1$s</string>
+    <string name="notif_free">Open-ended sharing</string>
+    <string name="notif_active_for">Active for %1$s</string>
+    <string name="notif_sends">%1$d sends</string>
+    <string name="notif_left">%1$s left</string>
+    <string name="notif_stop">Stop</string>
+    <string name="notif_channel_desc">Always-visible notice while your location is being shared</string>
+
+    <!-- end reasons -->
+    <string name="reason_manual">manual</string>
+    <string name="reason_arrival">arrival</string>
+    <string name="reason_battery">battery</string>
+    <string name="reason_timeout">time limit</string>
+    <string name="reason_permissions">missing permissions</string>
+
+    <!-- send results -->
+    <string name="queued_no_network">Queued: no network</string>
+    <string name="no_recipients">No recipient configured</string>
+    <string name="empty_message">Empty message</string>
+    <string name="sms_sent_to">Text sent to %1$d recipients</string>
+    <string name="body_format">Body format</string>
+    <string name="body_form">Form</string>
+    <string name="body_json">JSON</string>
+    <string name="body_form_help">Parameters travel as a classic form. In PHP they arrive in $_POST with no extra work.</string>
+    <string name="body_json_help">Parameters travel as a JSON object. In PHP read php://input and decode it: $_POST stays empty.</string>
+    <string name="sms_permission_missing">SMS permission not granted. Open Diagnostics to enable it.</string>
+    <string name="permissions_missing">Something is missing</string>
+    <string name="permissions_missing_body">One of the permissions the app needs has not been granted. Sharing may stop on its own or fail silently.</string>
+    <string name="open_diagnostics">Open diagnostics</string>
+    <string name="connection">Connection</string>
+    <string name="connection_help">Both of these lower the protection of what you send. Leave them off unless you know why you are turning them on.</string>
+    <string name="allow_cleartext">Allow plain HTTP</string>
+    <string name="allow_cleartext_help">Lets you use an http:// endpoint. Needed for a server with no certificate.</string>
+    <string name="allow_insecure_tls">Accept invalid certificates</string>
+    <string name="allow_insecure_tls_help">For a personal server with a self-signed certificate.</string>
+    <string name="security_warning">Reduced protection</string>
+    <string name="security_warning_http">Over plain HTTP everything travels readable: coordinates and the key in the URL. Anyone on the same network can see them. Use it only towards a server on your own network.</string>
+    <string name="security_warning_tls">With certificate checking off, the app can no longer tell your server from anyone pretending to be it. Whoever controls the network can read and alter what you send, key included. Use it only towards a server you run yourself.</string>
+    <string name="cleartext_blocked">http:// blocked. Turn on plain HTTP in the settings.</string>
+    <string name="ph_auth">Code that opens this journey on an I am here server</string>
+    <string name="ph_yourls">Shortened link, from YOURLS</string>
+    <string name="sms_count">%1$d of %2$d characters · %3$d SMS</string>
+    <string name="sms_unicode">accented or special characters cut the limit to 70</string>
+    <string name="sms_prefab">Ready-made messages</string>
+    <string name="prefab_osm">Use an OpenStreetMap link</string>
+    <string name="prefab_iamhere">Use an I am here link</string>
+    <string name="advanced">Advanced</string>
+    <string name="advanced_help">Only needed with an I am here server or your own URL shortener.</string>
+    <string name="iamhere_server">I am here server</string>
+    <string name="iamhere_server_help">Lets a text message carry the link to the live journey.</string>
+    <string name="token_secret">Journey code secret</string>
+    <string name="token_secret_help">The same value as token_secret in the server settings.php.</string>
+    <string name="fingerprint">Fingerprint:</string>
+    <string name="yourls">YOURLS</string>
+    <string name="yourls_help">Shortens the link before putting it in a text message. Needs your own YOURLS instance.</string>
+    <string name="yourls_use">Shorten links</string>
+    <string name="yourls_api">API address</string>
+    <string name="yourls_api_help">Your YOURLS address, with or without /yourls-api.php</string>
+    <string name="yourls_token">Signature token</string>
+    <string name="yourls_token_help">Generated in the YOURLS admin panel.</string>
+    <string name="yourls_template">Link to shorten</string>
+    <string name="yourls_template_help">Written with placeholders like the endpoint URL. The result goes into {yourls}.</string>
+    <string name="yourls_when">Shorten</string>
+    <string name="yourls_once">Per journey</string>
+    <string name="yourls_every">Per message</string>
+    <string name="yourls_test">Test connection</string>
+    <string name="sms_prefab_help">Shows the text and copies it, so you can paste it wherever you want.</string>
+    <string name="prefab_result">Ready-made message</string>
+    <string name="copied">Copied to the clipboard</string>
+    <string name="connection_sub">How to reach the server</string>
+    <string name="advanced_sub">I am here server and URL shortener</string>
+    <string name="placeholders_tap">Tap a placeholder to copy it to the clipboard.</string>
+    <string name="backup">Save and restore</string>
+    <string name="backup_sub">Move your setup to another phone</string>
+    <string name="backup_help">The file contains your server keys, so it is protected with a password. Lose the password and the file cannot be opened again.</string>
+    <string name="backup_settings">Settings</string>
+    <string name="backup_points">Saved destinations</string>
+    <string name="backup_password">File password</string>
+    <string name="backup_password_help">At least 6 characters. It is asked again when restoring, and there is no way to recover it.</string>
+    <string name="backup_export">Save to a file</string>
+    <string name="backup_import">Restore from a file</string>
+    <string name="backup_need_password">Choose a password of at least 6 characters first.</string>
+    <string name="backup_nothing">Tick at least one of the two boxes.</string>
+    <string name="backup_done_export">Saved.</string>
+    <string name="backup_done_import">Restored. %1$d destinations imported.</string>
+    <string name="backup_failed">Could not write the file.</string>
+    <string name="backup_wrong_password">Wrong password. Nothing has been changed.</string>
+    <string name="backup_bad_file">This is not an I am here backup file, or it is damaged. Nothing has been changed.</string>
+    <string name="backup_points_exist">Destinations already saved</string>
+    <string name="backup_points_exist_text">The file holds %1$d destinations and you already have %2$d. Keep both, or replace yours with the ones from the file?</string>
+    <string name="backup_keep">Keep both</string>
+    <string name="backup_replace">Replace</string>
+    <string name="cancel">Cancel</string>
+    <string name="backup_export_title">Save the configuration</string>
+    <string name="backup_import_title">Restore the configuration</string>
+    <string name="backup_password_again">Repeat the password</string>
+    <string name="backup_password_mismatch">The two passwords do not match.</string>
+    <string name="backup_choose_where">Choose where to save</string>
+    <string name="backup_choose_file">Choose the file</string>
+    <string name="backup_import_help">Enter the password used when the file was saved, then choose the file.</string>
+</resources>

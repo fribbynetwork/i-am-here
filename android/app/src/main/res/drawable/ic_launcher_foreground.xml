@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Punto esclamativo: fianchi quasi dritti, cosi la barra verticale
+         richiama la I di "I am here". Il gruppo tiene il simbolo dentro
+         i 72dp centrali, gli unici garantiti dopo il ritaglio della
+         maschera adattiva. -->
+    <group android:scaleX="0.75" android:scaleY="0.75" android:pivotX="54" android:pivotY="54">
+        <path android:fillColor="#E4572E"
+            android:pathData="M43.5,30 A10.5,10.5 0 0 1 64.5,30 L62.5,66 A8.5,8.5 0 0 1 45.5,66 Z" />
+        <path android:fillColor="#E4572E"
+            android:pathData="M54,86 m-7.5,0 a7.5,7.5 0 1,0 15,0 a7.5,7.5 0 1,0 -15,0" />
+    </group>
+</vector>

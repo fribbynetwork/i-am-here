@@ -1,0 +1,17 @@
+# I percorsi registrati sono dati personali, non codice.
+# Recorded journeys are personal data, not code.
+dati/*.json
+dati/*/*/*.json
+dati/.tentativi.json
+dati/.ultima-pulizia
+
+# Leaflet e incluso nel repository. Questa riga esclude solo eventuali
+# residui dello scompattamento e la mappa dei sorgenti, che non serve.
+# Leaflet is included in the repository. This only excludes leftovers from
+# unzipping, and the source map, which is not needed.
+leaflet/*.zip
+leaflet/*.map
+
+# Le impostazioni con le chiavi vere: si parte da settings-default.php.
+# The live settings with the real keys: start from settings-default.php.
+settings.php

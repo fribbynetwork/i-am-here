@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+      Il traffico in chiaro e permesso a livello di sistema, ma l'app lo
+      rifiuta comunque finche l'utente non accende "Consenti HTTP in chiaro"
+      nelle impostazioni. Il motivo e che questo file e statico e non puo
+      essere cambiato mentre l'app gira: aprire qui il varco e l'unico modo
+      per avere un interruttore vero, con un avviso che si vede.
+      Il controllo effettivo sta in Sender.sendHttp.
+    -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
