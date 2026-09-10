@@ -35,6 +35,8 @@ speed, altitude, satellites) and the transmission counters.
 A persistent notification stays in the shade while sharing runs, with elapsed
 time, distance left, the outcome of the last send and a Stop button.
 
+The project site is **[iamhere.it](https://iamhere.it)**.
+
 ## Installing
 
 The APK is on the [Releases](../../releases) page. Download it and open it:

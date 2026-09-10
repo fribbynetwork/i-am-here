@@ -26,7 +26,7 @@ const IAH_VERSION = '1.0.6.2';
  * qualunque installazione. Chi vuole cambiarli modifica queste righe.
  */
 const IAH_SITO = 'https://iamhere.it';
-const IAH_CODICE = 'https://github.com/fribbynetwork/I-am-here';
+const IAH_CODICE = 'https://github.com/fribbynetwork/i-am-here';
 
 if (PHP_VERSION_ID < 80000) {
     http_response_code(500);

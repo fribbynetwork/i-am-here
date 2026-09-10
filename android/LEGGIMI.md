@@ -36,6 +36,8 @@ avvio, stop e la scelta della destinazione. Più giù, l'ultima rilevazione
 Mentre la condivisione è in corso resta una notifica fissa con tempo trascorso,
 distanza residua, esito dell'ultimo invio e un pulsante Ferma.
 
+Il sito del progetto è **[iamhere.it](https://iamhere.it)**.
+
 ## Installazione
 
 L'APK si scarica dalla pagina [Releases](../../releases). Aprendolo, Android

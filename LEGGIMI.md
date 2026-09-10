@@ -1,7 +1,10 @@
 # I am here
 
-Condividi la posizione in tempo reale, e tieni il registro di dove sei stato.
-senza Google, e su un server tuo se lo vuoi.
+Condividi la posizione in tempo reale e tieni il registro di dove sei stato,
+senza Google e su un server tuo se lo vuoi.
+
+Sito: **[iamhere.it](https://iamhere.it)** · Dimostrazione dal vivo:
+**[demo.iamhere.it](https://demo.iamhere.it)**
 
 *This guide is also available [in English](README.md).*
 

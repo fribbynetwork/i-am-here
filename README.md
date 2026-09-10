@@ -1,7 +1,10 @@
 # I am here
 
-Share your live location, and keep the record of where you have been.
-without Google, and on a server of your own if you want one.
+Share your live location and keep the record of where you have been, without
+Google and on a server of your own if you want one.
+
+Site: **[iamhere.it](https://iamhere.it)** · Live demo:
+**[demo.iamhere.it](https://demo.iamhere.it)**
 
 *Questa guida è disponibile anche [in italiano](LEGGIMI.md).*
 

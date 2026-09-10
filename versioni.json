@@ -1,6 +1,8 @@
 {
   "_nota": "Ultime versioni pubblicate di I am here. Il campo codice e un intero che cresce di uno a ogni rilascio e serve al confronto; versione e l'etichetta da mostrare. Va aggiornato al momento del rilascio, non prima. / Latest published versions of I am here. The codice field is an integer that grows by one at every release and is what comparisons use; versione is the label to show. Update it at release time, not before.",
-  "rilasci": "https://github.com/fribbynetwork/I-am-here/releases",
+  "sito": "https://iamhere.it",
+  "demo": "https://demo.iamhere.it",
+  "rilasci": "https://github.com/fribbynetwork/i-am-here/releases",
   "app": {
     "codice": 6,
     "versione": "1.0.6t",

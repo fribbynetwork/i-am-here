@@ -11,6 +11,10 @@ framework, nessuna chiave API.
 
 ---
 
+Puoi vederlo in funzione, senza installare niente, su
+**[demo.iamhere.it](https://demo.iamhere.it)**: stesso codice, con percorsi
+generati al posto dei tuoi.
+
 ## Installazione
 
 1. Copia tutti i file su un host con PHP 8.0 o superiore.

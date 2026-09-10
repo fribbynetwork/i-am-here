@@ -11,6 +11,10 @@ API keys.
 
 ---
 
+You can see it running, with nothing to install, at
+**[demo.iamhere.it](https://demo.iamhere.it)**: the same code, with generated
+journeys instead of yours.
+
 ## Installing
 
 1. Copy every file to a host with PHP 8.0 or later.
