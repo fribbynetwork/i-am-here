@@ -21,8 +21,12 @@ object Yourls {
 
     private val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
+            // L'SMS aspetta questa risposta, quindi i tempi sono corti.
+            // callTimeout mette un tetto al giro completo, DNS compreso:
+            // senza, connessione e lettura si sommerebbero.
+            .connectTimeout(3, TimeUnit.SECONDS)
+            .readTimeout(4, TimeUnit.SECONDS)
+            .callTimeout(6, TimeUnit.SECONDS)
             .build()
     }
 

@@ -257,6 +257,11 @@ fun HomeScreen(
                 pending = pending,
                 lastResult = live.lastResult,
                 lastResultOk = live.lastResultOk,
+                smsAttivi = prefs.smsEnabled,
+                smsCount = live.smsCount,
+                smsPending = live.smsPending,
+                smsResult = live.smsResult,
+                smsResultOk = live.smsResultOk,
                 onRetry = { vm.retryQueue() }
             )
 
@@ -409,6 +414,11 @@ private fun TransmissionCard(
     pending: Int,
     lastResult: String?,
     lastResultOk: Boolean?,
+    smsAttivi: Boolean,
+    smsCount: Int,
+    smsPending: Int,
+    smsResult: String?,
+    smsResultOk: Boolean?,
     onRetry: () -> Unit
 ) {
     Card(Modifier.fillMaxWidth()) {
@@ -418,6 +428,30 @@ private fun TransmissionCard(
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Metric(stringResource(R.string.sent), sentCount.toString())
                 Metric(stringResource(R.string.queued), pending.toString())
+                // Il conteggio degli SMS compare solo se quel canale e
+                // acceso: altrimenti sarebbe uno zero senza significato.
+                if (smsAttivi) {
+                    Metric(stringResource(R.string.sms_sent_count), smsCount.toString())
+                }
+            }
+            if (smsAttivi && smsPending > 0) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    stringResource(R.string.sms_queued_count) + ": " + smsPending,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+            // Riga separata per gli SMS: con una sola, condivisa con
+            // l'endpoint, l'errore spariva in pochi secondi.
+            if (smsResult != null) {
+                Spacer(Modifier.height(10.dp))
+                Text(
+                    smsResult,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (smsResultOk == false) MaterialTheme.colorScheme.error
+                    else MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             if (lastResult != null) {
                 Spacer(Modifier.height(12.dp))

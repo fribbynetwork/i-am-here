@@ -5,15 +5,19 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.telephony.SmsManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -42,6 +46,17 @@ class TrackingService : Service() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val sendLock = Mutex()
+
+    /**
+     * Un rilevamento alla volta.
+     *
+     * onFix parte da due strade: la richiamata del GPS e l'ultima
+     * posizione nota letta all'avvio. Le due possono arrivare insieme, e
+     * senza questo lucchetto entrambe trovano started = false, prendono
+     * il ramo della partenza e inviano. E' cosi che partivano due SMS
+     * uguali con due link diversi, uno accorciato e uno no.
+     */
+    private val fixLock = Mutex()
     private val executor = Executors.newSingleThreadExecutor()
 
     private lateinit var engine: LocationEngine
@@ -66,6 +81,102 @@ class TrackingService : Service() {
      *  partenza" si calcola una volta e vale per tutti i messaggi. */
     private var linkBreve: String? = null
     private var started = false          // il primo punto e gia partito?
+
+    /**
+     * Un viaggio alla volta per ogni istanza del servizio. Senza questa
+     * bandiera due comandi di avvio ravvicinati, per esempio un doppio
+     * tocco o il riquadro delle impostazioni rapide insieme all'app,
+     * aprono due viaggi distinti.
+     */
+    private var avviato = false
+
+    /** Un SMS composto che non e ancora uscito. Il testo si conserva
+     *  com'era: rifarlo adesso metterebbe una posizione diversa. */
+    private data class SmsPendente(
+        val destinatario: String,
+        val testo: String,
+        val evento: String,
+        var tentativi: Int = 0
+    )
+
+    private val smsInAttesa = mutableListOf<SmsPendente>()
+    private var smsRiusciti = 0
+    private var smsSeq = 0
+
+    /** I messaggi consegnati al sistema e non ancora confermati. */
+    private val smsInVolo = HashMap<Int, SmsPendente>()
+
+    /**
+     * Android risponde qui quando un messaggio parte davvero o fallisce.
+     * Senza questo, l'app saprebbe solo che il sistema lo ha preso in
+     * carico, che e cosa diversa: senza campo il messaggio resta nella
+     * radio e fallisce piu tardi, in silenzio.
+     */
+    private val ricevitoreSms = object : BroadcastReceiver() {
+        override fun onReceive(c: Context?, intent: Intent?) {
+            val id = intent?.getIntExtra(EXTRA_SMS_ID, -1) ?: -1
+            val p = smsInVolo.remove(id) ?: return
+
+            if (resultCode == android.app.Activity.RESULT_OK) {
+                smsRiusciti++
+                TrackerState.update {
+                    it.copy(
+                        smsCount = smsRiusciti,
+                        smsPending = smsInAttesa.size,
+                        smsResult = i18n.getString(R.string.sms_ok, p.destinatario),
+                        smsResultOk = true,
+                        lastSmsAt = System.currentTimeMillis()
+                    )
+                }
+                return
+            }
+
+            // Fallito. Alcune cause passano, altre no: senza campo o con
+            // la radio spenta vale la pena riprovare, un numero sbagliato
+            // no.
+            val motivo = when (resultCode) {
+                SmsManager.RESULT_ERROR_NO_SERVICE -> R.string.sms_no_service
+                SmsManager.RESULT_ERROR_RADIO_OFF -> R.string.sms_radio_off
+                SmsManager.RESULT_ERROR_NULL_PDU -> R.string.sms_failed
+                else -> R.string.sms_failed
+            }
+            val ritentabile = resultCode == SmsManager.RESULT_ERROR_NO_SERVICE ||
+                resultCode == SmsManager.RESULT_ERROR_RADIO_OFF
+
+            if (ritentabile && p.tentativi < MAX_TENTATIVI_SMS) {
+                if (smsInAttesa.size < MAX_CODA_SMS) smsInAttesa.add(p)
+            }
+            TrackerState.update {
+                it.copy(
+                    smsPending = smsInAttesa.size,
+                    smsResult = i18n.getString(motivo, p.destinatario),
+                    smsResultOk = false
+                )
+            }
+        }
+    }
+
+    /** L'intento da consegnare ad Android insieme al messaggio. */
+    private fun intentoEsito(p: SmsPendente): PendingIntent {
+        val id = ++smsSeq
+        smsInVolo[id] = p
+        val i = Intent(ACTION_SMS_ESITO)
+            .setPackage(packageName)
+            .putExtra(EXTRA_SMS_ID, id)
+        return PendingIntent.getBroadcast(
+            this, id, i,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    /** Riprova i messaggi rimasti indietro, uno per volta. */
+    private fun ritentaSms() {
+        if (smsInAttesa.isEmpty()) return
+        val p = smsInAttesa.removeAt(0)
+        p.tentativi++
+        Sender.reinviaSms(this, prefs, p.destinatario, p.testo, intentoEsito(p))
+        TrackerState.update { it.copy(smsPending = smsInAttesa.size) }
+    }
     private var armed = false            // uscito almeno una volta dal raggio?
     private var finishing = false
     private var sentCount = 0
@@ -77,6 +188,11 @@ class TrackingService : Service() {
         engine = LocationEngine(this)
         settings = SettingsStore(this)
         db = Db.get(this)
+        // Non esportato: lo mandiamo solo noi, a noi stessi.
+        ContextCompat.registerReceiver(
+            this, ricevitoreSms, IntentFilter(ACTION_SMS_ESITO),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
         createChannel()
     }
 
@@ -89,11 +205,29 @@ class TrackingService : Service() {
             ACTION_RESUME -> {
                 val id = intent.getLongExtra(EXTRA_TRIP_ID, 0L)
                 if (!startForegroundNow()) return START_NOT_STICKY
+                if (avviato) return START_STICKY
+                avviato = true
                 scope.launch { begin(resumeTripId = id) }
             }
             else -> {
                 if (!startForegroundNow()) return START_NOT_STICKY
-                scope.launch { begin(resumeTripId = null) }
+                /*
+                 * Un secondo comando di avvio, mentre un viaggio e gia in
+                 * corso, non deve cominciarne un altro: begin() calcola un
+                 * tripId nuovo dall'orologio, e a un secondo di distanza
+                 * sarebbe un viaggio diverso, con un altro codice di
+                 * accesso e un altro messaggio di partenza.
+                 *
+                 * Con START_STICKY il sistema puo anche richiamarci senza
+                 * intent dopo averci chiusi: li si riprende il viaggio
+                 * rimasto aperto, invece di aprirne uno nuovo.
+                 */
+                if (avviato) return START_STICKY
+                avviato = true
+                scope.launch {
+                    val aperto = if (intent == null) db.trips().openTrip()?.id else null
+                    begin(resumeTripId = aperto)
+                }
             }
         }
         return START_STICKY
@@ -169,6 +303,7 @@ class TrackingService : Service() {
     }
 
     private suspend fun onFix(loc: Location) {
+      fixLock.withLock {
         if (finishing) return
 
         val destDist: Double? = if (prefs.hasDestination)
@@ -249,7 +384,16 @@ class TrackingService : Service() {
         lastAcceptedLat = loc.latitude
         lastAcceptedLon = loc.longitude
         updateNotification()
+      }
     }
+
+    /**
+     * Cosa scrivere al posto del nome della meta quando non ce n'e una.
+     * Segue la lingua scelta nelle impostazioni, non quella del telefono.
+     */
+    private fun destLibera(sms: Boolean): String = i18n.getString(
+        if (sms) R.string.dest_free_sms else R.string.dest_free_endpoint
+    )
 
     /** Intervallo adattivo: si stringe in prossimita della meta, si allarga da fermi. */
     private fun effectiveInterval(dist: Double?, speed: Float?): Long {
@@ -307,19 +451,51 @@ class TrackingService : Service() {
             val throttled = event == "track" &&
                 now - lastSmsAt < prefs.smsMinIntervalSec * 1000L
             if (!throttled) {
-                if (prefs.yourlsTemplate.isNotBlank() &&
-                    (linkBreve == null || prefs.yourlsOgniMessaggio)
-                ) {
-                    linkBreve = Sender.linkPerSms(prefs, sample)
+                /*
+                 * Il link si prepara prima di inviare, mai dopo: il
+                 * messaggio parte una volta sola, gia con la versione
+                 * giusta. Si contatta YOURLS solo se il messaggio di
+                 * questo evento contiene davvero {yourls}, e il risultato
+                 * si memorizza solo se e riuscito.
+                 */
+                var link = linkBreve
+                if (Sender.serveYourls(prefs, event)) {
+                    if (link == null || prefs.yourlsOgniMessaggio) {
+                        val corto = Sender.linkAccorciato(prefs, sample, destLibera(sms = true))
+                        if (corto != null) { link = corto; linkBreve = corto }
+                    }
+                    // Senza accorciamento si manda il link per esteso:
+                    // meglio un indirizzo lungo che un messaggio monco.
+                    if (link == null) link = Sender.linkLungo(prefs, sample, destLibera(sms = true))
                 }
-                val r = Sender.sendSms(this, prefs, sample, event, linkBreve.orEmpty())
+                /*
+                 * Il testo si compone una volta e si conserva: se il
+                 * messaggio va rimandato deve portare la posizione di
+                 * adesso, non quella del momento in cui si riprova.
+                 */
+                val testo = Sender.smsText(prefs, sample, event, link.orEmpty(), destLibera(sms = true))
+                val r = Sender.sendSms(this, prefs, sample, event, link.orEmpty(), destLibera(sms = true)) { n ->
+                    intentoEsito(SmsPendente(n, testo, event))
+                }
                 lastSmsAt = now
                 TrackerState.update { it.copy(lastSmsAt = now) }
+
+                /*
+                 * Qui si sa solo se Android ha preso in carico il
+                 * messaggio. Se non l'ha nemmeno preso, l'errore e
+                 * immediato e riprovare non servirebbe: manca il
+                 * permesso, il destinatario o la SIM. L'esito vero arriva
+                 * dopo, al ricevitore.
+                 */
                 if (!r.ok) {
-                    TrackerState.update { it.copy(lastResult = "SMS: " + r.detail, lastResultOk = false) }
+                    TrackerState.update { it.copy(smsResult = r.detail, smsResultOk = false) }
                 }
             }
         }
+
+        // I messaggi rimasti indietro riprovano a ogni rilevamento, uno
+        // alla volta per non intasare la radio.
+        ritentaSms()
     }
 
     /**
@@ -333,7 +509,7 @@ class TrackingService : Service() {
         }
         val pending = db.samples().pending(200)
         for (s in pending) {
-            val r = Sender.sendHttp(i18n, prefs, s, s.event)
+            val r = Sender.sendHttp(i18n, prefs, s, s.event, destLibera(sms = false))
             if (r.ok) {
                 db.samples().update(s.copy(sentAt = System.currentTimeMillis(), attempts = s.attempts + 1, lastError = null))
                 sentCount++
@@ -455,6 +631,7 @@ class TrackingService : Service() {
     }
 
     override fun onDestroy() {
+        runCatching { unregisterReceiver(ricevitoreSms) }
         engine.stop()
         releaseWakeLock()
         executor.shutdown()
@@ -468,6 +645,11 @@ class TrackingService : Service() {
         const val ACTION_START = "net.fribbynetwork.iamhere.START"
         const val ACTION_STOP = "net.fribbynetwork.iamhere.STOP"
         const val ACTION_RESUME = "net.fribbynetwork.iamhere.RESUME"
+        const val ACTION_SMS_ESITO = "net.fribbynetwork.iamhere.SMS_ESITO"
+        const val EXTRA_SMS_ID = "sms_id"
+        /** Oltre non si insiste: se il campo non torna, non tornera. */
+        const val MAX_TENTATIVI_SMS = 3
+        const val MAX_CODA_SMS = 10
         const val EXTRA_TRIP_ID = "tripId"
     }
 }

@@ -21,6 +21,16 @@ data class LiveState(
     val sentCount: Int = 0,
     val lastResult: String? = null,
     val lastResultOk: Boolean? = null,
+    /*
+     * Gli SMS hanno una riga di esito tutta loro. Con una sola,
+     * condivisa con l'endpoint, l'errore di un SMS spariva in pochi
+     * secondi: l'endpoint trasmette a ogni rilevamento e la sovrascriveva
+     * prima che si potesse leggere.
+     */
+    val smsCount: Int = 0,
+    val smsPending: Int = 0,
+    val smsResult: String? = null,
+    val smsResultOk: Boolean? = null,
     val lastSmsAt: Long? = null,
     val nextSendAt: Long? = null,
     val endReason: String? = null

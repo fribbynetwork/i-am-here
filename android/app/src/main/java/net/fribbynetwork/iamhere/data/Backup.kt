@@ -175,6 +175,9 @@ object Backup {
         put("yourlsToken", p.yourlsToken)
         put("yourlsTemplate", p.yourlsTemplate)
         put("yourlsOgniMessaggio", p.yourlsOgniMessaggio)
+        // Solo la scelta: la versione trovata e l'ultima data dipendono
+        // da questo telefono e non ha senso portarsele dietro.
+        put("controlloGiorni", p.controlloGiorni)
         put("intervalSec", p.intervalSec)
         put("minDistanceM", p.minDistanceM)
         put("adaptive", p.adaptive)
@@ -220,6 +223,7 @@ object Backup {
             yourlsToken = o.optString("yourlsToken", d.yourlsToken),
             yourlsTemplate = o.optString("yourlsTemplate", d.yourlsTemplate),
             yourlsOgniMessaggio = o.optBoolean("yourlsOgniMessaggio", d.yourlsOgniMessaggio),
+            controlloGiorni = o.optInt("controlloGiorni", d.controlloGiorni),
             intervalSec = o.optInt("intervalSec", d.intervalSec),
             minDistanceM = o.optInt("minDistanceM", d.minDistanceM),
             adaptive = o.optBoolean("adaptive", d.adaptive),

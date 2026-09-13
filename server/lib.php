@@ -1,5 +1,5 @@
 <?php
-/* IAH-VERSION 1.0.6.2 */
+/* IAH-VERSION 1.1 */
 /**
  * I am here, funzioni condivise fra dati.php, index.php e viaggi.php.
  *
@@ -16,7 +16,7 @@ declare(strict_types=1);
 
 /** Versione dei file del server. Serve a verifica.php per accorgersi se
  *  un file e rimasto indietro durante un aggiornamento parziale. */
-const IAH_VERSION = '1.0.6.2';
+const IAH_VERSION = '1.1';
 
 /**
  * Pagina ufficiale del progetto, dove si scarica l'app, e il repository
@@ -27,6 +27,19 @@ const IAH_VERSION = '1.0.6.2';
  */
 const IAH_SITO = 'https://iamhere.it';
 const IAH_CODICE = 'https://github.com/fribbynetwork/i-am-here';
+
+/**
+ * Il numero di rilascio di questa copia del server.
+ *
+ * E' un intero che cresce di uno a ogni pubblicazione, e serve solo al
+ * confronto: IAH_VERSION e l'etichetta da mostrare, ma confrontare
+ * "1.0.10" con "1.0.6" come testo darebbe il risultato sbagliato, perche
+ * "1" viene prima di "6".
+ */
+const IAH_RILASCIO = 2;
+
+/** Dove sta il file con le ultime versioni pubblicate. */
+const IAH_VERSIONI = 'https://raw.githubusercontent.com/fribbynetwork/i-am-here/HEAD/versioni.json';
 
 if (PHP_VERSION_ID < 80000) {
     http_response_code(500);
@@ -484,6 +497,94 @@ function tutti_gli_id(): array
     $ids = array_keys($ids);
     rsort($ids);
     return $ids;
+}
+
+/**
+ * Controlla se c'e una versione piu recente del server.
+ *
+ * Non usa cron: tiene da parte la data dell'ultimo controllo e ne rifa
+ * uno quando sono passati i giorni impostati. Il risultato resta nel file
+ * di stato, cosi le pagine successive lo leggono senza uscire in rete.
+ *
+ * E' spento di partenza. Un controllo automatico fa sapere a GitHub
+ * l'indirizzo IP di questa installazione, a intervalli regolari: per un
+ * programma che promette di non contattare nessuno e una scelta che deve
+ * restare di chi lo installa.
+ *
+ * La lingua non si decide qui: il pannello la sceglie da se, quindi si
+ * restituiscono entrambe le versioni del testo.
+ *
+ * @return array{versione: string, novita: array}|null
+ */
+function aggiornamento_disponibile(): ?array
+{
+    if (!cfg('controllo_aggiornamenti')) { return null; }
+
+    $f = cartella_dati() . '/.aggiornamenti.json';
+    $s = is_file($f) ? leggi_json($f) : null;
+    $s = is_array($s) ? $s : [];
+
+    $giorni = max(1, (int) cfg('giorni_controllo'));
+    $scaduto = (time() - (int) ($s['quando'] ?? 0)) > $giorni * 86400;
+
+    if ($scaduto) {
+        // Si segna subito la data, anche se il controllo fallisce: senza,
+        // un GitHub irraggiungibile farebbe ritentare a ogni pagina.
+        $s['quando'] = time();
+        $remoto = scarica_versioni();
+        if ($remoto !== null) {
+            $s['codice'] = (int) ($remoto['server']['codice'] ?? 0);
+            $s['versione'] = (string) ($remoto['server']['versione'] ?? '');
+            $s['novita'] = $remoto['server']['novita'] ?? [];
+        }
+        scrivi_json($f, $s);
+    }
+
+    if ((int) ($s['codice'] ?? 0) <= IAH_RILASCIO) { return null; }
+
+    return [
+        'versione' => (string) ($s['versione'] ?? ''),
+        'novita' => is_array($s['novita'] ?? null) ? $s['novita'] : [],
+    ];
+}
+
+/**
+ * Legge il file delle versioni. Prova prima con le funzioni di base e
+ * ripiega su cURL: su parecchi hosting allow_url_fopen e disattivato.
+ * I tempi sono corti perche questa attesa la paga chi sta guardando una
+ * pagina.
+ */
+function scarica_versioni(): ?array
+{
+    $testo = null;
+
+    if (function_exists('curl_init')) {
+        $c = curl_init(IAH_VERSIONI);
+        curl_setopt_array($c, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_USERAGENT => 'I am here ' . IAH_VERSION,
+        ]);
+        $r = curl_exec($c);
+        if (is_string($r) && curl_getinfo($c, CURLINFO_RESPONSE_CODE) === 200) { $testo = $r; }
+        curl_close($c);
+    }
+
+    if ($testo === null && filter_var(ini_get('allow_url_fopen'), FILTER_VALIDATE_BOOLEAN)) {
+        $ctx = stream_context_create(['http' => [
+            'timeout' => 5,
+            'header' => 'User-Agent: I am here ' . IAH_VERSION . "\r\n",
+        ]]);
+        $r = @file_get_contents(IAH_VERSIONI, false, $ctx);
+        if (is_string($r)) { $testo = $r; }
+    }
+
+    if ($testo === null) { return null; }
+    $j = json_decode($testo, true);
+    return is_array($j) ? $j : null;
 }
 
 // ------------------------------------------------------------- manutenzione

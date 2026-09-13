@@ -117,7 +117,8 @@ object Templates {
         decimals: Int,
         sentAt: Long = System.currentTimeMillis(),
         segreto: String = "",
-        yourls: String = ""
+        yourls: String = "",
+        destLibera: String = ""
     ): Map<String, String> {
         val f = "%.${decimals.coerceIn(0, 9)}f"
         val m = HashMap<String, String>(32)
@@ -141,7 +142,10 @@ object Templates {
         m["rete"] = s.network ?: ""
         m["press"] = s.pressure?.let { String.format(Locale.US, "%.2f", it) } ?: ""
         m["dist"] = s.distToDest?.let { String.format(Locale.US, "%.0f", it) } ?: ""
-        m["dest"] = s.destName ?: ""
+        // In condivisione libera non c'e un nome da mettere: al posto di
+        // lasciare il messaggio monco si scrive che destinazione non ce
+        // n'era. Il testo arriva tradotto da chi chiama.
+        m["dest"] = s.destName?.takeIf { it.isNotBlank() } ?: destLibera
         m["ritardo"] = ((sentAt / 1000L) - s.fixTime).coerceAtLeast(0L).toString()
         m["auth"] = codiceViaggio(s.tripId, segreto)
         m["yourls"] = yourls

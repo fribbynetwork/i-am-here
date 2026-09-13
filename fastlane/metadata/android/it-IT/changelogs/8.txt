@@ -1,0 +1,5 @@
+Corretto l'invio di due SMS invece di uno all'avvio della condivisione.
+Gli SMS riportano l'esito vero: riusciti, in attesa o non riusciti, con il motivo.
+Un messaggio non partito per mancanza di campo viene rimandato da solo.
+Nuovo controllo delle versioni, facoltativo e spento di partenza.
+Senza destinazione i messaggi non restano più con uno spazio vuoto.

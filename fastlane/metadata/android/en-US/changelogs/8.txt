@@ -1,0 +1,5 @@
+Fixed two text messages being sent instead of one when sharing starts.
+Messages now report what really happened: sent, waiting or failed, with the reason.
+A message held back for lack of signal is retried on its own.
+New update check, optional and off by default.
+With no destination set, messages no longer leave a gap.

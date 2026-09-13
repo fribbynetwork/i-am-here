@@ -69,7 +69,7 @@
     <string name="how_to_transmit">How to transmit</string>
     <string name="how_to_transmit_help">Use the endpoint, SMS or both. Each has its own schedule.</string>
     <string name="send_to_endpoint">Send to endpoint</string>
-    <string name="send_by_sms">Send by SMS</string>
+    <string name="send_by_sms">Send SMS</string>
     <string name="when_label">When</string>
     <string name="mode_start_end">Start and arrival</string>
     <string name="mode_always">Along the way too</string>
@@ -134,6 +134,19 @@
 
     <!-- settings: appearance -->
     <string name="appearance">Appearance</string>
+    <string name="updates">Updates</string>
+    <string name="updates_help">Checking asks GitHub whether a newer version exists. It tells GitHub this phone\'s address, so it is off unless you turn it on. Nothing is downloaded or installed on its own.</string>
+    <string name="updates_every">How often to check (days)</string>
+    <string name="updates_never">Never</string>
+    <string name="updates_7">7</string>
+    <string name="updates_14">14</string>
+    <string name="updates_30">30</string>
+    <string name="updates_check_now">Check now</string>
+    <string name="updates_checking">Checking…</string>
+    <string name="updates_current">This is the latest version.</string>
+    <string name="updates_failed">Could not check. Try again later.</string>
+    <string name="updates_found">Version %1$s is available</string>
+    <string name="updates_open_page">Open the releases page</string>
     <string name="theme">Theme</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
@@ -167,6 +180,8 @@
     <string name="ph_press">Barometric pressure in hPa</string>
     <string name="ph_dist">Metres left to the destination</string>
     <string name="ph_dest">Destination name</string>
+    <string name="dest_free_sms">Destination</string>
+    <string name="dest_free_endpoint">No destination</string>
     <string name="ph_ritardo">Seconds between fix and send</string>
 
     <!-- history -->
@@ -223,6 +238,12 @@
     <string name="no_recipients">No recipient configured</string>
     <string name="empty_message">Empty message</string>
     <string name="sms_sent_to">Text sent to %1$d recipients</string>
+    <string name="sms_ok">Text message sent to %1$s</string>
+    <string name="sms_no_service">No service: message queued for %1$s</string>
+    <string name="sms_radio_off">Radio off: message queued for %1$s</string>
+    <string name="sms_failed">Message to %1$s failed</string>
+    <string name="sms_queued_count">SMS waiting</string>
+    <string name="sms_sent_count">SMS</string>
     <string name="body_format">Body format</string>
     <string name="body_form">Form</string>
     <string name="body_json">JSON</string>
@@ -246,7 +267,7 @@
     <string name="ph_yourls">Shortened link, from YOURLS</string>
     <string name="sms_count">%1$d of %2$d characters · %3$d SMS</string>
     <string name="sms_unicode">accented or special characters cut the limit to 70</string>
-    <string name="sms_prefab">Ready-made messages</string>
+    <string name="sms_prefab">Preset messages</string>
     <string name="prefab_osm">Use an OpenStreetMap link</string>
     <string name="prefab_iamhere">Use an I am here link</string>
     <string name="advanced">Advanced</string>

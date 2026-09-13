@@ -29,8 +29,8 @@ android {
         // versionCode va aumentato di 1 a ogni rilascio, sempre: e il
         // numero da cui Android capisce che una copia e piu recente.
         // versionName e solo l'etichetta che vede la persona.
-        versionCode = 6
-        versionName = "1.0.6t"
+        versionCode = 8
+        versionName = "1.1"
     }
 
     signingConfigs {

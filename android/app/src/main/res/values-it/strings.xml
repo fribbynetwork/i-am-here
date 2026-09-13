@@ -61,7 +61,7 @@
     <string name="how_to_transmit">Come trasmettere</string>
     <string name="how_to_transmit_help">Puoi usare l\'endpoint, gli SMS o entrambi. Ognuno ha la sua modalità.</string>
     <string name="send_to_endpoint">Invia all\'endpoint</string>
-    <string name="send_by_sms">Invia via SMS</string>
+    <string name="send_by_sms">Invia SMS</string>
     <string name="when_label">Quando</string>
     <string name="mode_start_end">Partenza e arrivo</string>
     <string name="mode_always">Anche in viaggio</string>
@@ -103,7 +103,7 @@
     <string name="max_duration_off">Nessun limite: si ferma solo a mano o all\'arrivo.</string>
     <string name="max_duration_on">Oltre questo tempo la condivisione si chiude da sola.</string>
     <string name="battery_stop">Ferma sotto batteria</string>
-    <string name="battery_stop_off">Zero: trasmetti fino allo spegnimento, sfruttando ogni invio possibile.</string>
+    <string name="battery_stop_off">Zero: trasmetti finché il telefono non si spegne.</string>
     <string name="battery_stop_on">Sotto questa soglia parte un ultimo invio e la condivisione si chiude.</string>
     <string name="coord_decimals">Decimali delle coordinate</string>
     <string name="coord_decimals_help">Sei decimali sono circa 11 cm: oltre è solo rumore.</string>
@@ -114,6 +114,19 @@
     <string name="custom_style_help">Ha la precedenza su tutto il resto. Utile per uno stile self-hosted.</string>
 
     <string name="appearance">Aspetto</string>
+    <string name="updates">Aggiornamenti</string>
+    <string name="updates_help">Il controllo chiede a GitHub se esiste una versione più recente. Così facendo gli fa sapere l\'indirizzo di questo telefono, quindi è spento finché non lo accendi. Non viene scaricato né installato niente da solo.</string>
+    <string name="updates_every">Ogni quanti giorni controllare</string>
+    <string name="updates_never">Mai</string>
+    <string name="updates_7">7</string>
+    <string name="updates_14">14</string>
+    <string name="updates_30">30</string>
+    <string name="updates_check_now">Controlla ora</string>
+    <string name="updates_checking">Controllo in corso…</string>
+    <string name="updates_current">Questa è la versione più recente.</string>
+    <string name="updates_failed">Controllo non riuscito. Riprova più tardi.</string>
+    <string name="updates_found">Disponibile la versione %1$s</string>
+    <string name="updates_open_page">Apri la pagina dei rilasci</string>
     <string name="theme">Tema</string>
     <string name="theme_system">Sistema</string>
     <string name="theme_light">Chiaro</string>
@@ -144,6 +157,8 @@
     <string name="ph_press">Pressione barometrica in hPa</string>
     <string name="ph_dist">Metri residui alla destinazione</string>
     <string name="ph_dest">Nome della destinazione</string>
+    <string name="dest_free_sms">Destinazione</string>
+    <string name="dest_free_endpoint">Destinazione libera</string>
     <string name="ph_ritardo">Secondi tra rilevamento e invio</string>
 
     <string name="last_trip">Ultimo viaggio</string>
@@ -169,7 +184,7 @@
     <string name="check_sms">Invio SMS</string>
     <string name="check_sms_help">Serve solo se usi il canale SMS.</string>
     <string name="restricted_settings">Permesso SMS non attivabile?</string>
-    <string name="restricted_settings_help">Android blocca il permesso SMS alle app installate aprendo direttamente un file APK, e mostra uno scudo con scritto che l\'accesso è stato negato. Per sbloccarlo: Impostazioni, App, questa app, poi il menu a tre puntini in alto a destra e la voce sulle impostazioni con restrizioni. Confermi con PIN o impronta e da lì il permesso si concede normalmente. Le app installate da uno store, F-Droid compreso, non incontrano questo blocco.</string>
+    <string name="restricted_settings_help">Android blocca il permesso SMS alle app installate da un file APK, e mostra uno scudo con scritto che l\'accesso è stato negato. Per sbloccarlo: Impostazioni, App, questa app, poi il menu a tre puntini in alto a destra e la voce sulle impostazioni con restrizioni. Confermi con PIN o impronta e da lì il permesso si concede normalmente. Le app installate da uno store, F-Droid compreso, non incontrano questo blocco.</string>
     <string name="check_battery">Batteria non ottimizzata</string>
     <string name="check_battery_help">Non è obbligatoria: un servizio in primo piano lavora comunque. L\'esenzione aiuta nelle soste lunghe a schermo spento e dopo un riavvio.</string>
     <string name="open_settings">Apri</string>
@@ -195,6 +210,12 @@
     <string name="no_recipients">Nessun destinatario configurato</string>
     <string name="empty_message">Messaggio vuoto</string>
     <string name="sms_sent_to">SMS a %1$d destinatari</string>
+    <string name="sms_ok">SMS inviato a %1$s</string>
+    <string name="sms_no_service">Senza campo: messaggio in coda per %1$s</string>
+    <string name="sms_radio_off">Radio spenta: messaggio in coda per %1$s</string>
+    <string name="sms_failed">Messaggio a %1$s non riuscito</string>
+    <string name="sms_queued_count">SMS in attesa</string>
+    <string name="sms_sent_count">SMS</string>
     <string name="body_format">Formato del corpo</string>
     <string name="body_form_help">I parametri viaggiano come un modulo classico. In PHP arrivano in $_POST senza fare nulla.</string>
     <string name="body_json_help">I parametri viaggiano come oggetto JSON. In PHP vanno letti da php://input e decodificati: $_POST resta vuoto.</string>
@@ -216,7 +237,7 @@
     <string name="ph_yourls">Link accorciato, da YOURLS</string>
     <string name="sms_count">%1$d caratteri su %2$d · %3$d SMS</string>
     <string name="sms_unicode">lettere accentate o simboli abbassano il limite a 70</string>
-    <string name="sms_prefab">Messaggi già pronti</string>
+    <string name="sms_prefab">Messaggi preconfigurati</string>
     <string name="prefab_osm">Usa un link OpenStreetMap</string>
     <string name="prefab_iamhere">Usa un link I am here</string>
     <string name="advanced">Avanzate</string>

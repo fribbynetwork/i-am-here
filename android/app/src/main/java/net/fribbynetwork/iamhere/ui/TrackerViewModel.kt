@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.net.Uri
+import net.fribbynetwork.iamhere.R
+import net.fribbynetwork.iamhere.net.Aggiornamenti
 import net.fribbynetwork.iamhere.data.Backup
 import net.fribbynetwork.iamhere.data.Db
 import net.fribbynetwork.iamhere.data.Poi
@@ -125,14 +127,63 @@ class TrackerViewModel(app: Application) : AndroidViewModel(app) {
 
     fun retryQueue() = FlushWorker.schedule(getApplication<Application>())
 
+    /**
+     * Controlla se esiste una versione piu recente.
+     *
+     * Con forzato = false parte solo se l'utente ha acceso il controllo e
+     * sono passati i giorni impostati; il pulsante nelle impostazioni
+     * passa true e chiede subito, anche a controllo spento.
+     *
+     * Il risultato resta nelle preferenze: cosi l'avviso si rivede senza
+     * uscire di nuovo in rete.
+     */
+    fun controllaAggiornamenti(forzato: Boolean = false, esito: ((String?) -> Unit)? = null) =
+        viewModelScope.launch(Dispatchers.IO) {
+            val p = store.current()
+            if (!forzato && !Aggiornamenti.eOra(p)) { esito?.invoke(null); return@launch }
+
+            /*
+             * language e una scelta a tre valori, non un codice: con
+             * "sistema" la lingua vera la sa solo il contesto, quindi si
+             * legge da li invece di darla per scontata.
+             */
+            val loc = getApplication<Application>().withLocale(p.language)
+                .resources.configuration.locales[0].language
+            val r = Aggiornamenti.controlla(if (loc == "it") "it" else "en")
+            val adesso = System.currentTimeMillis()
+            if (r == null) {
+                // Si segna comunque il tentativo: senza, un GitHub
+                // irraggiungibile farebbe riprovare a ogni apertura.
+                store.save(p.copy(ultimoControllo = adesso))
+                esito?.invoke(null)
+                return@launch
+            }
+            store.save(
+                p.copy(
+                    ultimoControllo = adesso,
+                    versioneTrovata = r.versione,
+                    codiceTrovato = r.codice,
+                    novitaTrovate = r.novita
+                )
+            )
+            val installato = Aggiornamenti.rilascioInstallato(getApplication<Application>())
+            esito?.invoke(if (r.codice > installato) r.versione else "")
+        }
+
+    /** Vero se quello che sappiamo e piu recente di quello installato. */
+    fun aggiornamentoPronto(p: Prefs): Boolean =
+        p.codiceTrovato > Aggiornamenti.rilascioInstallato(getApplication<Application>())
+
     fun clearHistory() = viewModelScope.launch { db.samples().clearAll() }
 
     /** Prova di invio con una posizione fittizia. */
     fun testSend(event: String, onResult: (String) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         val p = prefs.value
         val sample = net.fribbynetwork.iamhere.net.Templates.demoSample(event)
-        val preview = Sender.preview(p, sample, event)
-        val r = Sender.sendHttp(getApplication<Application>().withLocale(p.language), p, sample, event)
+        val preview = Sender.preview(p, sample, event,
+            getApplication<Application>().withLocale(p.language).getString(R.string.dest_free_endpoint))
+        val ctx = getApplication<Application>().withLocale(p.language)
+        val r = Sender.sendHttp(ctx, p, sample, event, ctx.getString(R.string.dest_free_endpoint))
         val text = preview + "\n\n---\n" + (if (r.ok) "OK  " else "ERRORE  ") + r.detail
         withContext(Dispatchers.Main) { onResult(text) }
     }
@@ -204,8 +255,10 @@ class TrackerViewModel(app: Application) : AndroidViewModel(app) {
     fun testSms(event: String, onResult: (String) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         val p = prefs.value
         val sample = net.fribbynetwork.iamhere.net.Templates.demoSample(event)
-        val text = Sender.smsText(p, sample, event)
-        val r = Sender.sendSms(getApplication<Application>(), p, sample, event)
+        val ctxSms = getApplication<Application>().withLocale(p.language)
+        val libera = ctxSms.getString(R.string.dest_free_sms)
+        val text = Sender.smsText(p, sample, event, destLibera = libera)
+        val r = Sender.sendSms(ctxSms, p, sample, event, destLibera = libera)
         val out = text + "\n\n---\n" + (if (r.ok) "OK  " else "ERRORE  ") + r.detail
         withContext(Dispatchers.Main) { onResult(out) }
     }

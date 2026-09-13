@@ -1,5 +1,5 @@
 <?php
-/* IAH-VERSION 1.0.6.2 */
+/* IAH-VERSION 1.1 */
 /**
  * I am here, verifica dell'installazione / installation check.
  *
@@ -197,6 +197,23 @@ esito('Chiave richiesta per guardare', (bool) cfg('require_auth'),
     cfg('require_auth')
         ? 'Attiva: serve un codice per aprire un percorso.'
         : 'SPENTA: chiunque indovini un orario vede i tuoi percorsi. Metti require_auth a true.');
+
+// --- aggiornamenti ---------------------------------------------------------
+if (cfg('controllo_aggiornamenti')) {
+    $nuova = aggiornamento_disponibile();
+    esito('Aggiornamenti',
+        $nuova === null,
+        $nuova === null
+            ? 'Questa e la versione piu recente (' . IAH_VERSION . ').'
+            : 'Disponibile la versione ' . e($nuova['versione']) . '. '
+              . 'Si aggiorna copiando i file nuovi sopra i vecchi: settings.php non e nel pacchetto.',
+        false);
+} else {
+    esito('Aggiornamenti', true,
+        'Controllo spento. Si accende con controllo_aggiornamenti in settings.php: '
+        . 'il server chiedera a GitHub, una volta ogni due settimane, se c\'e una versione nuova.',
+        false);
+}
 
 // --- fuso orario -----------------------------------------------------------
 $tz = (string) cfg('timezone');

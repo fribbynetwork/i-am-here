@@ -71,6 +71,16 @@ data class Prefs(
      *  true  = un link nuovo a ogni messaggio, con la posizione di quel momento. */
     val yourlsOgniMessaggio: Boolean = false,
 
+    // --- aggiornamenti ---
+    /** Ogni quanti giorni controllare. Zero significa mai, ed e il valore
+     *  di partenza: il controllo esce in rete, quindi lo si accende. */
+    val controlloGiorni: Int = 0,
+    val ultimoControllo: Long = 0L,
+    /** L'ultima versione vista, per poterla mostrare senza ricontrollare. */
+    val versioneTrovata: String = "",
+    val codiceTrovato: Int = 0,
+    val novitaTrovate: String = "",
+
     // --- cadenza ---
     val intervalSec: Int = 60,
     val minDistanceM: Int = 100,
@@ -135,6 +145,11 @@ private object K {
     val yourlsToken = stringPreferencesKey("yourlsToken")
     val yourlsTemplate = stringPreferencesKey("yourlsTemplate")
     val yourlsOgniMessaggio = booleanPreferencesKey("yourlsOgniMessaggio")
+    val controlloGiorni = intPreferencesKey("controlloGiorni")
+    val ultimoControllo = longPreferencesKey("ultimoControllo")
+    val versioneTrovata = stringPreferencesKey("versioneTrovata")
+    val codiceTrovato = intPreferencesKey("codiceTrovato")
+    val novitaTrovate = stringPreferencesKey("novitaTrovate")
     val intervalSec = intPreferencesKey("intervalSec")
     val minDistanceM = intPreferencesKey("minDistanceM")
     val adaptive = booleanPreferencesKey("adaptive")
@@ -182,6 +197,11 @@ class SettingsStore(private val context: Context) {
             yourlsToken = p[K.yourlsToken] ?: d.yourlsToken,
             yourlsTemplate = p[K.yourlsTemplate] ?: d.yourlsTemplate,
             yourlsOgniMessaggio = p[K.yourlsOgniMessaggio] ?: d.yourlsOgniMessaggio,
+            controlloGiorni = p[K.controlloGiorni] ?: d.controlloGiorni,
+            ultimoControllo = p[K.ultimoControllo] ?: d.ultimoControllo,
+            versioneTrovata = p[K.versioneTrovata] ?: d.versioneTrovata,
+            codiceTrovato = p[K.codiceTrovato] ?: d.codiceTrovato,
+            novitaTrovate = p[K.novitaTrovate] ?: d.novitaTrovate,
             intervalSec = p[K.intervalSec] ?: d.intervalSec,
             minDistanceM = p[K.minDistanceM] ?: d.minDistanceM,
             adaptive = p[K.adaptive] ?: d.adaptive,
@@ -240,6 +260,11 @@ class SettingsStore(private val context: Context) {
             e[K.yourlsToken] = p.yourlsToken
             e[K.yourlsTemplate] = p.yourlsTemplate
             e[K.yourlsOgniMessaggio] = p.yourlsOgniMessaggio
+            e[K.controlloGiorni] = p.controlloGiorni
+            e[K.ultimoControllo] = p.ultimoControllo
+            e[K.versioneTrovata] = p.versioneTrovata
+            e[K.codiceTrovato] = p.codiceTrovato
+            e[K.novitaTrovate] = p.novitaTrovate
             e[K.intervalSec] = p.intervalSec
             e[K.minDistanceM] = p.minDistanceM
             e[K.adaptive] = p.adaptive

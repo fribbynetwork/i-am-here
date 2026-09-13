@@ -8,6 +8,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import net.fribbynetwork.iamhere.R
 import net.fribbynetwork.iamhere.data.Db
 import net.fribbynetwork.iamhere.data.SettingsStore
 import net.fribbynetwork.iamhere.net.Sender
@@ -29,7 +30,7 @@ class FlushWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         if (pending.isEmpty()) return Result.success()
 
         for (s in pending) {
-            val r = Sender.sendHttp(loc, prefs, s, s.event)
+            val r = Sender.sendHttp(loc, prefs, s, s.event, loc.getString(R.string.dest_free_endpoint))
             if (r.ok) {
                 db.samples().update(
                     s.copy(sentAt = System.currentTimeMillis(), attempts = s.attempts + 1, lastError = null)

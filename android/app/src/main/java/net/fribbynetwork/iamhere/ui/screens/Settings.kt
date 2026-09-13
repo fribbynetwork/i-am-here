@@ -1,7 +1,9 @@
 package net.fribbynetwork.iamhere.ui.screens
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.telephony.SubscriptionManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -53,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import net.fribbynetwork.iamhere.net.Aggiornamenti
 import net.fribbynetwork.iamhere.R
 import net.fribbynetwork.iamhere.data.Backup
 import net.fribbynetwork.iamhere.data.HttpMethod
@@ -82,6 +85,9 @@ fun SettingsScreen(vm: TrackerViewModel, onBack: () -> Unit) {
     /** Il facsimile appena generato: si mostra in un campo a parte invece
      *  di sovrascrivere un messaggio che l'utente aveva gia scritto. */
     var facsimile by remember { mutableStateOf<String?>(null) }
+
+    /** L'esito dell'ultimo controllo manuale delle versioni. */
+    var esitoAggiorna by remember { mutableStateOf<String?>(null) }
     val appunti = LocalClipboardManager.current
     /** Ultimo segnaposto toccato, per mostrargli accanto la conferma. */
     var segnaCopiato by remember { mutableStateOf<String?>(null) }
@@ -498,6 +504,75 @@ fun SettingsScreen(vm: TrackerViewModel, onBack: () -> Unit) {
                 }
             }
 
+            SectionExpandable(stringResource(R.string.updates)) {
+                Column {
+                    Text(
+                        stringResource(R.string.updates_help),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    ChoiceRow(
+                        stringResource(R.string.updates_every),
+                        listOf(
+                            0 to stringResource(R.string.updates_never),
+                            7 to stringResource(R.string.updates_7),
+                            14 to stringResource(R.string.updates_14),
+                            30 to stringResource(R.string.updates_30)
+                        ),
+                        p.controlloGiorni
+                    ) { edit { s -> s.copy(controlloGiorni = it) } }
+
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedButton(
+                        onClick = {
+                            esitoAggiorna = context.getString(R.string.updates_checking)
+                            vm.controllaAggiornamenti(forzato = true) { v ->
+                                esitoAggiorna = when {
+                                    v == null -> context.getString(R.string.updates_failed)
+                                    v.isBlank() -> context.getString(R.string.updates_current)
+                                    else -> context.getString(R.string.updates_found, v)
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text(stringResource(R.string.updates_check_now)) }
+
+                    esitoAggiorna?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(it, style = MaterialTheme.typography.bodySmall)
+                    }
+
+                    // Quando c'e una versione nuova si mostra cosa cambia
+                    // e dove prenderla: l'app non scarica niente da se.
+                    if (vm.aggiornamentoPronto(p)) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            stringResource(R.string.updates_found, p.versioneTrovata),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        if (p.novitaTrovate.isNotBlank()) {
+                            Text(
+                                p.novitaTrovate,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        OutlinedButton(
+                            onClick = {
+                                runCatching {
+                                    context.startActivity(
+                                        Intent(Intent.ACTION_VIEW, Uri.parse(Aggiornamenti.PAGINA_RILASCI))
+                                    )
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) { Text(stringResource(R.string.updates_open_page)) }
+                    }
+                }
+            }
+
             SectionExpandable(stringResource(R.string.appearance)) {
                 Column {
                     ChoiceRow(
@@ -877,7 +952,7 @@ private fun prefabIamHere(urlEndpoint: String): String {
     val base = runCatching {
         val u = java.net.URI(urlEndpoint.substringBefore('{'))
         if (u.scheme != null && u.host != null) "${u.scheme}://${u.host}" else null
-    }.getOrNull() ?: "https://TUO-SERVER"
+    }.getOrNull() ?: "https://www.domain.test"
     return "{evento} $base/?id={timestamp}&auth={auth}"
 }
 

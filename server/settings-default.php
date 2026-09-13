@@ -189,6 +189,30 @@ return [
      */
     'timezone' => '',
 
+    /*
+     * Controllo delle nuove versioni.
+     *
+     * Spento di partenza, e la scelta e voluta: un controllo automatico
+     * fa sapere a GitHub l'indirizzo IP di questa installazione, a
+     * intervalli regolari. Per un programma che promette di non
+     * contattare nessuno, accenderlo deve essere una decisione tua.
+     *
+     * Acceso, il server legge una volta ogni giorni_controllo un piccolo
+     * file su GitHub e, se c'e una versione piu recente, lo scrive nel
+     * pannello dei viaggi e in verifica.php. Non scarica e non installa
+     * niente: l'aggiornamento resta una copia di file fatta da te.
+     *
+     * Update check. Off by default, and deliberately so: an automatic
+     * check tells GitHub this installation's IP address at regular
+     * intervals. For a program that promises to contact nobody, turning
+     * it on has to be your decision.
+     * When on, every giorni_controllo days the server reads a small file
+     * on GitHub and, if a newer version exists, says so in the journey
+     * panel and in verifica.php. It downloads and installs nothing.
+     */
+    'controllo_aggiornamenti' => false,
+    'giorni_controllo' => 14,
+
 // =====================================================================
 //  MAPPA / MAP
 // =====================================================================

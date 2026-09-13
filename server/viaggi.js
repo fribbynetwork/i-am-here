@@ -1,4 +1,4 @@
-/* IAH-VERSION 1.0.6.2 */
+/* IAH-VERSION 1.1 */
 /*
  * I am here, pannelli dell'elenco viaggi.
  *
@@ -20,7 +20,7 @@
       caricamento: 'Un momento…', punti: 'punti', inCorso: 'in corso',
       copia: 'Copia link', copiato: 'Copiato', elimina: 'Elimina',
       confermaElimina: 'Eliminare questo viaggio? L\u2019operazione non si può annullare.',
-      server: 'Server v',
+      server: 'Server v', nuovaVersione: 'Disponibile la versione',
       strumenti: 'Importa ed esporta', esporta: 'Esporta', importa: 'Importa',
       espViaggio: 'Questo viaggio', espPeriodo: 'Il periodo che stai guardando',
       espTutto: 'Tutto l\u2019archivio', formato: 'Formato',
@@ -44,7 +44,7 @@
       caricamento: 'One moment…', punti: 'points', inCorso: 'running',
       copia: 'Copy link', copiato: 'Copied', elimina: 'Delete',
       confermaElimina: 'Delete this journey? This cannot be undone.',
-      server: 'Server v',
+      server: 'Server v', nuovaVersione: 'Version available:',
       strumenti: 'Import and export', esporta: 'Export', importa: 'Import',
       espViaggio: 'This journey', espPeriodo: 'The period you are viewing',
       espTutto: 'The whole archive', formato: 'Format',
@@ -191,6 +191,11 @@
          <strong>${esc(p.anno)}</strong>
          ${piuVecchio ? `<button type="button" class="anno" data-anno="${esc(piuVecchio)}">${esc(piuVecchio)} ↓</button>` : '<span></span>'}
        </footer>` : `<p class="nota">${esc(t().caricamento)}</p>`}
+       ${DATI.aggiorna ? `<a class="aggiorna" href="${esc(DATI.rilasci || '#')}" rel="noopener" target="_blank">
+            <strong>${esc(t().nuovaVersione)} ${esc(DATI.aggiorna.versione)}</strong>
+            ${DATI.aggiorna.novita && DATI.aggiorna.novita[lingua()]
+              ? `<span>${esc(DATI.aggiorna.novita[lingua()])}</span>` : ''}
+          </a>` : ''}
        <div class="fondo">
          <a class="esci" href="?esci=1">${esc(t().esci)}</a>
          <span class="versione">${esc(t().server)} ${esc(DATI.versione || '')}</span>

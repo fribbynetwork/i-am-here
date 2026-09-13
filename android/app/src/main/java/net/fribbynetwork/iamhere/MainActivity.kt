@@ -11,6 +11,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +88,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun AppRoot() {
     val vm: TrackerViewModel = viewModel()
+
+    /*
+     * Il controllo delle versioni parte qui, all'apertura, e solo se
+     * l'utente lo ha acceso e sono passati i giorni che ha scelto. Non
+     * serve un lavoro pianificato: chi apre l'app e il momento giusto
+     * per dirglielo, e chi non la apre non ha bisogno di saperlo.
+     */
+    LaunchedEffect(Unit) { vm.controllaAggiornamenti() }
     val prefs by vm.prefs.collectAsStateWithLifecycle()
     var stack by remember { mutableStateOf(listOf<Route>(Route.Home)) }
 

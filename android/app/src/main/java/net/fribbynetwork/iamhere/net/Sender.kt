@@ -1,5 +1,6 @@
 package net.fribbynetwork.iamhere.net
 
+import android.app.PendingIntent
 import android.content.Context
 import android.telephony.SmsManager
 import net.fribbynetwork.iamhere.R
@@ -64,8 +65,14 @@ object Sender {
      * in query (GET), nel corpo come form (POST form) o come oggetto
      * JSON (POST JSON). Cosi non serve configurare due volte le stesse cose.
      */
-    fun buildRequest(prefs: Prefs, sample: Sample, event: String = sample.event): Request {
-        val values = Templates.valuesOf(sample, prefs.coordDecimals, segreto = prefs.tokenSecret)
+    fun buildRequest(
+        prefs: Prefs,
+        sample: Sample,
+        event: String = sample.event,
+        destLibera: String = ""
+    ): Request {
+        val values = Templates.valuesOf(sample, prefs.coordDecimals, segreto = prefs.tokenSecret,
+            destLibera = destLibera)
         val rendered = Templates.render(prefs.urlFor(event), values, Templates.Mode.URL)
 
         val qIndex = rendered.indexOf('?')
@@ -99,11 +106,12 @@ object Sender {
         context: Context,
         prefs: Prefs,
         sample: Sample,
-        event: String = sample.event
+        event: String = sample.event,
+        destLibera: String = ""
     ): SendResult {
         // Un template malformato solleva gia qui, prima di toccare la rete.
         val req = try {
-            buildRequest(prefs, sample, event)
+            buildRequest(prefs, sample, event, destLibera)
         } catch (e: Exception) {
             return SendResult(false, descrivi(e))
         }
@@ -130,8 +138,9 @@ object Sender {
         e.javaClass.simpleName + (e.message?.let { ": $it" } ?: "")
 
     /** Testo e URL composti, per il pulsante di prova. */
-    fun preview(prefs: Prefs, sample: Sample, event: String): String {
-        val values = Templates.valuesOf(sample, prefs.coordDecimals, segreto = prefs.tokenSecret)
+    fun preview(prefs: Prefs, sample: Sample, event: String, destLibera: String = ""): String {
+        val values = Templates.valuesOf(sample, prefs.coordDecimals, segreto = prefs.tokenSecret,
+            destLibera = destLibera)
         val url = Templates.render(prefs.urlFor(event), values, Templates.Mode.URL)
         return when (prefs.method) {
             HttpMethod.GET -> "GET $url"
@@ -149,37 +158,97 @@ object Sender {
         }
     }
 
-    fun smsText(prefs: Prefs, sample: Sample, event: String, yourls: String = ""): String {
+    fun smsText(
+        prefs: Prefs,
+        sample: Sample,
+        event: String,
+        yourls: String = "",
+        destLibera: String = ""
+    ): String {
         val values = Templates.valuesOf(
-            sample, prefs.coordDecimals, segreto = prefs.tokenSecret, yourls = yourls
+            sample, prefs.coordDecimals, segreto = prefs.tokenSecret, yourls = yourls,
+            destLibera = destLibera
         )
         return Templates.render(prefs.smsFor(event), values, Templates.Mode.RAW)
     }
 
     /** Il link da mandare a YOURLS, con i segnaposto gia sostituiti. */
-    fun linkLungo(prefs: Prefs, sample: Sample): String {
+    fun linkLungo(prefs: Prefs, sample: Sample, destLibera: String = ""): String {
         if (prefs.yourlsTemplate.isBlank()) return ""
-        val values = Templates.valuesOf(sample, prefs.coordDecimals, segreto = prefs.tokenSecret)
+        val values = Templates.valuesOf(sample, prefs.coordDecimals, segreto = prefs.tokenSecret,
+            destLibera = destLibera)
         return Templates.render(prefs.yourlsTemplate, values, Templates.Mode.RAW)
     }
 
     /**
-     * Il link da mettere nel messaggio: accorciato se YOURLS e attivo e
-     * risponde, altrimenti quello lungo. Un accorciatore irraggiungibile
-     * non deve impedire l'invio dell'SMS.
+     * Il link accorciato, oppure null se non si e potuto accorciare.
+     *
+     * Restituire null invece del link lungo serve a chi chiama: un
+     * fallimento temporaneo non deve essere memorizzato come se fosse il
+     * link buono, altrimenti tutto il resto del viaggio userebbe quello
+     * lungo anche quando YOURLS torna disponibile.
      */
-    fun linkPerSms(prefs: Prefs, sample: Sample): String {
-        val lungo = linkLungo(prefs, sample)
-        if (!prefs.yourlsEnabled || lungo.isBlank()) return lungo
-        return Yourls.accorcia(prefs, lungo) ?: lungo
+    fun linkAccorciato(prefs: Prefs, sample: Sample, destLibera: String = ""): String? {
+        if (!prefs.yourlsEnabled) return null
+        val lungo = linkLungo(prefs, sample, destLibera)
+        if (lungo.isBlank()) return null
+        return Yourls.accorcia(prefs, lungo)
     }
 
+    /**
+     * Rimanda un testo gia composto, senza ricomporlo: un messaggio di
+     * partenza deve conservare la posizione che aveva allora, non quella
+     * del momento in cui si riprova.
+     */
+    fun reinviaSms(
+        context: Context,
+        prefs: Prefs,
+        destinatario: String,
+        testo: String,
+        esito: PendingIntent? = null
+    ): SendResult = try {
+        val mgr = smsManager(context, prefs.smsSubscriptionId)
+        val parts = mgr.divideMessage(testo)
+        if (parts.size > 1) {
+            val intenti = ArrayList<PendingIntent?>(parts.size)
+            repeat(parts.size - 1) { intenti.add(null) }
+            intenti.add(esito)
+            mgr.sendMultipartTextMessage(destinatario, null, parts, intenti, null)
+        } else {
+            mgr.sendTextMessage(destinatario, null, testo, esito, null)
+        }
+        SendResult(true, context.getString(R.string.sms_sent_to, 1))
+    } catch (e: Exception) {
+        SendResult(false, e.javaClass.simpleName + ": " + (e.message ?: ""))
+    }
+
+    /** Vero se il messaggio di questo evento contiene davvero {yourls}. */
+    fun serveYourls(prefs: Prefs, event: String): Boolean =
+        prefs.smsFor(event).contains("{yourls}")
+
+    /**
+     * Manda il messaggio a ogni destinatario.
+     *
+     * Consegnare un SMS al sistema riesce quasi sempre: vuol dire che
+     * Android lo ha preso in carico, non che sia partito. Senza campo
+     * resta nella radio e fallisce piu tardi, in silenzio.
+     *
+     * Per saperlo davvero si passa 'esito': una funzione che, dato il
+     * destinatario, restituisce l'intento da richiamare quando il
+     * messaggio parte o fallisce. Chi chiama riceve cosi l'esito vero,
+     * con il motivo, invece di una promessa.
+     *
+     * Con un messaggio lungo Android lo spezza: l'intento si attacca solo
+     * all'ultimo pezzo, che e quello che dice se e uscito tutto.
+     */
     fun sendSms(
         context: Context,
         prefs: Prefs,
         sample: Sample,
         event: String,
-        yourls: String = ""
+        yourls: String = "",
+        destLibera: String = "",
+        esito: ((destinatario: String) -> PendingIntent?)? = null
     ): SendResult {
         if (androidx.core.content.ContextCompat.checkSelfPermission(
                 context, android.Manifest.permission.SEND_SMS
@@ -194,18 +263,22 @@ object Sender {
             .filter { it.isNotEmpty() }
         if (recipients.isEmpty()) return SendResult(false, context.getString(R.string.no_recipients))
 
-        val text = smsText(prefs, sample, event, yourls)
+        val text = smsText(prefs, sample, event, yourls, destLibera)
         if (text.isBlank()) return SendResult(false, context.getString(R.string.empty_message))
 
         return try {
             val mgr = smsManager(context, prefs.smsSubscriptionId)
             var sent = 0
             for (n in recipients) {
+                val pi = esito?.invoke(n)
                 val parts = mgr.divideMessage(text)
                 if (parts.size > 1) {
-                    mgr.sendMultipartTextMessage(n, null, parts, null, null)
+                    val intenti = ArrayList<PendingIntent?>(parts.size)
+                    repeat(parts.size - 1) { intenti.add(null) }
+                    intenti.add(pi)
+                    mgr.sendMultipartTextMessage(n, null, parts, intenti, null)
                 } else {
-                    mgr.sendTextMessage(n, null, text, null, null)
+                    mgr.sendTextMessage(n, null, text, pi, null)
                 }
                 sent++
             }

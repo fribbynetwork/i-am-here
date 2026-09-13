@@ -1,4 +1,4 @@
-/* IAH-VERSION 1.0.6.2 */
+/* IAH-VERSION 1.1 */
 /*
  * I am here, stylesheet / foglio di stile.
  *
@@ -423,6 +423,19 @@ body[data-livello="chiuso"] #riapri {
   font-size: 16px; font-weight: 650;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+/* L'avviso di una versione nuova: sta sopra la riga di chiusura, dove si
+   guarda quando si cerca la versione in uso. */
+.pannello .aggiorna {
+  flex: none; display: block; margin: 0 10px 8px;
+  padding: 9px 11px; border-radius: 10px; text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--orange) 40%, transparent);
+  background: color-mix(in srgb, var(--orange) 12%, transparent);
+  color: var(--text);
+}
+.pannello .aggiorna:hover { border-color: var(--orange); }
+.pannello .aggiorna strong { display: block; font-size: 13px; }
+.pannello .aggiorna span { display: block; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
 /* In fondo, staccata da tutto: chiude la sessione, non un pannello.
    Accanto la versione del server, che dice a colpo d'occhio se i file
    caricati sono quelli nuovi. */

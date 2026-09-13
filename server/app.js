@@ -1,4 +1,4 @@
-/* IAH-VERSION 1.0.6.2 */
+/* IAH-VERSION 1.1 */
 /*
  * I am here, map viewer / visualizzatore del percorso.
  *

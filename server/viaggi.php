@@ -1,5 +1,5 @@
 <?php
-/* IAH-VERSION 1.0.6.2 */
+/* IAH-VERSION 1.1 */
 /**
  * I am here, elenco dei viaggi / journey list.
  *
@@ -384,6 +384,10 @@ $bootstrap = [
     'lingua'    => cfg('default_language'),
     'csrf'      => $_SESSION['csrf'] ?? '',
     'versione'  => IAH_VERSION,
+    // Il controllo esce in rete al massimo una volta ogni due settimane,
+    // e solo per chi e entrato: non tocca chi guarda un percorso.
+    'aggiorna'  => $dentro ? aggiornamento_disponibile() : null,
+    'rilasci'   => IAH_CODICE . '/releases',
     'pulsanti'  => [
         'fit'       => (bool) cfg('btn_fit'),
         'riepilogo' => (bool) cfg('btn_summary'),

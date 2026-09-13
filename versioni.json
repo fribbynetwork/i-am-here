@@ -4,19 +4,19 @@
   "demo": "https://demo.iamhere.it",
   "rilasci": "https://github.com/fribbynetwork/i-am-here/releases",
   "app": {
-    "codice": 6,
-    "versione": "1.0.6t",
+    "codice": 8,
+    "versione": "1.1",
     "novita": {
-      "it": "Prima versione pubblica.",
-      "en": "First public release."
+      "it": "Corretto il doppio SMS, esito reale degli invii e controllo delle versioni.",
+      "en": "Fixed the duplicate text message, real send outcomes and an update check."
     }
   },
   "server": {
-    "codice": 1,
-    "versione": "1.0.6.2",
+    "codice": 2,
+    "versione": "1.1",
     "novita": {
-      "it": "Prima versione pubblica.",
-      "en": "First public release."
+      "it": "Controllo delle versioni, facoltativo e spento di partenza.",
+      "en": "Update check, optional and off by default."
     }
   }
 }
